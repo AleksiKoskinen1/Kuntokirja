@@ -1,0 +1,7 @@
+com\aleksikuntokirja\kuntokirja\KuntokirjaApplication.class
+com\aleksikuntokirja\kuntokirja\RestReittiController.class
+com\aleksikuntokirja\kuntokirja\GymProgramRepository.class
+com\aleksikuntokirja\kuntokirja\GymProgram.class
+com\aleksikuntokirja\kuntokirja\Weight.class
+com\aleksikuntokirja\kuntokirja\WeightRepository.class
+com\aleksikuntokirja\kuntokirja\DatabaseLoader.class

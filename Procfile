@@ -1,0 +1,1 @@
+web: java -jar target/kuntokirja-1.0.jar
