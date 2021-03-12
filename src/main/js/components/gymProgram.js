@@ -52,12 +52,20 @@ class GymProgram extends Component{
 
     loadGymData2(id = false) {
 
-        let right = this.calDiv.getBoundingClientRect().right;
-        right += 400;
+    //    let right = this.calDiv.getBoundingClientRect().right;
+    //    right += 400;
+    //    let size = "full";
+    //    console.log("right: " +right);
+    //    console.log("SIZE!!" + size);
+    //    console.log("winddow!!" + window.innerWidth);
+   //     if(window.innerWidth < right ) size= "small";
+   //     console.log(this.props.user);
+        let calW = this.calDiv.clientWidth;
+        let minWi = 298;
         let size = "full";
+        if(calW < minWi) size= "small";
 
-        if(window.innerWidth < right ) size= "small";
-
+     //   console.log("SIZE11!!" + size);
         let startOfWeek = moment(this.state.date).startOf('isoweek');
         let dayS = startOfWeek;
         let endOfWeek = moment(this.state.date).endOf('isoweek');
@@ -181,17 +189,25 @@ class GymProgram extends Component{
     }
 
     checkSize(){
-        let right = this.calDiv.getBoundingClientRect().right;
+      /*  let right = this.calDiv.clientWidth;
+        console.log("TABLE right: " +right);
         right += 400;
-      //  console.log("window: " +window.innerWidth);
-     //   console.log("calRight: " +right);    
-        
-        if(window.innerWidth < right && this.state.mainContentSize != "small"){
+        console.log("window width: " +window.innerWidth);  */
+     //   console.log(this.state);
+
+        let calWidth = this.calDiv.clientWidth;
+        let minW = 298;
+        let minWindowW = 1390;
+    //    console.log("calWidth: " +calWidth);
+     //   console.log("window width: " +window.innerWidth);
+        if(calWidth < minW && window.innerWidth < minWindowW && this.state.mainContentSize != "small"){
+         //   console.log("checkSizeSMALL");
             this.setState({
                 mainContentSize: "small"
             });
         }
-        else if(window.innerWidth > right && this.state.mainContentSize != "full"){
+        else if(calWidth > minW && window.innerWidth > minWindowW && this.state.mainContentSize != "full"){
+       //     console.log("checkSizeFULL");
             this.setState({
                 mainContentSize: "full"
             });
@@ -210,21 +226,20 @@ class GymProgram extends Component{
     
     deleteProgram(id){
 
-        fetch(api, root, [
-			{rel: 'gymPrograms'}]
-		).then(results => {  
-            return api({method: 'DELETE', path: results.url + "/"+id});
-        }).done(success => {
+        api({method: 'DELETE', path: '/api/delProg/'+id}).done(() => {
             this.loadGymData2();
-        });           
+        });
+        
     }
 
     saveEdits(id, title, content){
      
+        console.log(id);
         fetch(api, root, [
 			{rel: 'gymPrograms'}]
 		).done(results => {              
             api({method: 'GET', path: results.url + "/"+id}).done(program => {
+           //     console.log(program);
                 let entity = program.entity;
                 entity.program = title;
                 entity.subject = content;
@@ -235,7 +250,7 @@ class GymProgram extends Component{
                     headers: {
                         'Content-Type': 'application/json'
                     }
-                }).done(success => {
+                }).done(() => {
                     this.loadGymData2(id);
                 })
             });
@@ -244,10 +259,12 @@ class GymProgram extends Component{
 	
 	render() { 
 
-        const size = this.state.mainContentSize;
+        const size =  this.state.mainContentSize;
         let mainB = "mainBody";
         if(size == "small") mainB = "mainBodySm";
 
+        console.log(this.state);
+     //   console.log("RENDER + sIZE : " + size);
         const stickyNotes = () => {
             if(this.state.showNote){
                 return <StickyNote size={size} key={this.state.note.id} note={this.state.note} saveEdits={this.saveEdits} deleteProgram={this.deleteProgram}/>;
@@ -273,12 +290,11 @@ class GymProgram extends Component{
                                     weekEnd={this.state.endNro}
                                     weekdates={this.state.weekdates}
                                     dayStr={this.state.dayStr}
-                                    size={size}
-                                    setCalDiv={this.setCalDiv}
+                                    size={size}                             
                                     newProgram={this.newProgram}
                                     showProgram={this.showProgram} />
                         <div id="rightDivs">
-                            <div id="calendarDiv"> 
+                            <div id="calendarDiv" ref={this.setCalDiv}>  
                                 <Calendar
                                     onChange={this.onChange}
                                     value={this.state.date}
@@ -294,11 +310,9 @@ class GymProgram extends Component{
                 {size == "small" &&
 
                     <div className="mainContent">
-                   
-                        
 
                         <div id="rightDivsSm">
-                            <div id="calendarDivSm" > 
+                            <div id="calendarDivSm" ref={this.setCalDiv}> 
                                 <Calendar
                                     onChange={this.onChange}
                                     value={this.state.date}
@@ -317,8 +331,7 @@ class GymProgram extends Component{
                                     weekEnd={this.state.endNro}
                                     weekdates={this.state.weekdates}
                                     dayStr={this.state.dayStr}
-                                    size={size}
-                                    setCalDiv={this.setCalDiv}
+                                    size={size}                                    
                                     newProgram={this.newProgram}
                                     showProgram={this.showProgram} />
 
@@ -339,14 +352,22 @@ class StickyNote extends Component {
         this.handleContentChange = this.handleContentChange.bind(this);
         this.handleSaveEdits = this.handleSaveEdits.bind(this);
         this.handleDeleteProgram = this.handleDeleteProgram.bind(this);
+        this.checkSize = this.checkSize.bind(this);
         this.titleEditable = React.createRef();
         this.contentEditable = React.createRef();
+        this.timeDiv = null;
+        this.butDiv = null;
+        this.contDiv = null;
+        this.setTimeDiv = element => { this.timeDiv = element; };
+        this.setButDiv = element => { this.butDiv = element; };
+        this.setContDiv = element => { this.contDiv = element; };
         let titleText = '<span style="color: black; font-size: 1.2rem; ">' + this.props.note.program+'</span>';
         let contentText = '<span>' + this.props.note.subject+'</span>';
         this.state = {title: titleText,
                       titleText: this.props.note.program,
                       content: contentText,
-                      contentText : this.props.note.subject
+                      contentText : this.props.note.subject,
+                      small: false
                      };
     } 
 
@@ -365,6 +386,39 @@ class StickyNote extends Component {
     handleDeleteProgram(e){
         e.preventDefault();
         this.props.deleteProgram(this.props.note.id);
+    }
+
+    componentDidMount() { 
+		window.addEventListener('resize', this.checkSize);
+		this.checkSize();
+	}
+	componentWillUnmount() {
+        window.removeEventListener("resize", this.checkSize);
+    }
+
+    checkSize(){
+
+     //   console.log(this.timeDiv.getBoundingClientRect());
+        let timeDiv = this.timeDiv.getBoundingClientRect().right + 20;
+        let butDiv = this.butDiv.getBoundingClientRect().left;
+        let total = this.timeDiv.offsetWidth + this.butDiv.offsetWidth + 20;
+     /*   console.log(total);
+        console.log(this.contDiv.offsetWidth);
+        console.log(timeDiv);
+        console.log(butDiv);*/
+        if(butDiv < timeDiv){  //Liian pieni näkymä napeille in here
+          //  console.log("SMALL");
+            this.setState({
+                small: true,
+                smallSizeLimit: this.contDiv.offsetWidth
+            });
+        }
+        else if(this.state.small && this.contDiv.offsetWidth > this.state.smallSizeLimit){
+           // console.log("FULL");
+            this.setState({
+                small: false
+            });
+        }
     }
 
     render() {
@@ -400,9 +454,30 @@ class StickyNote extends Component {
             var dateS = this.props.note.localDate.split("-");
             return dateS[2]+"."+dateS[1]+"."+dateS[0];
         };
+
+        const generateInfo = () => {
+
+            if(!this.state.small){
+                return(
+                    <div className="programDataBtns" ref={this.setButDiv}>
+                        <button title="Tallenna tehdyt muutokset ohjelmaan" className="saveProg pointer" onClick={this.handleSaveEdits}>Tallenna</button>
+                        <button title="Poista tämä ohjelma kalenterista" className="pointer" onClick={this.handleDeleteProgram}>Poista ohjelma</button>
+                    </div>
+                )
+            }
+            else{
+                return(
+                    <div className="programDataBtns" ref={this.setButDiv}>
+                        <input className="talImages pointer" type="image" src="save.png" alt="T" title="Tallenna tehdyt muutokset ohjelmaan" width="24" height="24"></input>
+                        <input className="pointer" type="image" src="trash.png" alt="P" title="Poista tämä ohjelma kalenterista" width="24" height="24"></input>
+                    </div>
+                )
+
+            }
+        };
       
         return (
-            <div key={this.props.note.id} className={size}>
+            <div key={this.props.note.id} className={size} >
                 <div className="handle">
                     <div className="noteTitle">
                         <ContentEditable
@@ -414,7 +489,7 @@ class StickyNote extends Component {
                     />
                     </div>
                 </div>
-                <div className={contentsize}>
+                <div className={contentsize} ref={this.setContDiv}>
                     <ContentEditable
                         innerRef={this.contentEditable}
                         html={this.state.content} 
@@ -424,14 +499,15 @@ class StickyNote extends Component {
                     />
                 </div>
                 <div>
-                    <div className="programData">
+                    <div className="programData" ref={this.setTimeDiv}>
                         <p className="datespan">{startString+ " - "+ endString}</p>
                         <p className="datespan">{dateString()}</p>
                     </div>
-                    <div className="programDataBtns">
-                        <button className="saveProg" onClick={this.handleSaveEdits}>Tallenna</button>
-                        <button onClick={this.handleDeleteProgram}>Poista ohjelma</button>
-                    </div>
+                   
+                       
+                        {generateInfo()}
+                        
+                    
                 </div>
             </div>
         )    
@@ -522,10 +598,6 @@ class Scheduler extends Component{
         if(this.props.size == "small"){
             scheduSize = "schedulerSm";
         }
-        
-        const programs = this.props.gymprograms.map((item) =>           
-            <Program key={item.id} program={item} weekdates={this.props.weekdates} showProgram={this.props.showProgram}/>
-        );
 
         const startTimes = [];
         const endTimes = [];
@@ -541,11 +613,9 @@ class Scheduler extends Component{
 
         return(
 
-            <div id={scheduSize} ref={this.props.setCalDiv}>
+            <div id={scheduSize}>
 
-                <ScheduleFullTable show={this.show} start={this.props.weekStart} end={this.props.weekEnd}  curday={this.props.weekdayNro} dayStr={this.props.dayStr} />
-                   
-                {programs}
+                <ScheduleFullTable progs={this.props.gymprograms} show={this.show} start={this.props.weekStart} end={this.props.weekEnd}  curday={this.props.weekdayNro} dayStr={this.props.dayStr} showProgram={this.props.showProgram}/>
 
                 <div ref={this.setModalDivRef} className="modalDialog">
                     <div>
@@ -597,27 +667,36 @@ class Program extends Component {
         this.props.showProgram(this.props.program.id);
     }
 
+    mouseIn(){
+        Array.from(document.getElementsByClassName("schecolumn")).forEach(
+            function(element, index, array) {
+                element.classList.remove("schedulertablehover");
+            }
+        );
+    }
+    mouseOut(){
+        Array.from(document.getElementsByClassName("schecolumn")).forEach(
+            function(element, index, array) {
+                element.classList.add("schedulertablehover");
+            }
+        );
+    }
+
     render() {
 
-        let dayPosition = this.props.weekdates.indexOf(this.props.program.localDate); //Katsotaan missä päivässä mennään
-        let leftPosition = 0;
-        
-        if(dayPosition != 0){
-            leftPosition = dayPosition * 10.2;
-        }
         const Colors = ["lightsalmon", "lightseagreen", "lightgreen", "lightskyblue", "orange", "brown", "lightgrey"];
         const getColor = () => {            
-            return Colors[dayPosition];
+            return Colors[this.props.dayOfW];
         };
 
         let endString = "", startString = "";
         let startT = this.props.program.startTime;
-        let height = (startT - 6) * 3;
+        let topPos = 0;
         
         let duration = this.props.program.duration * 1.5;
         let endTime = this.props.program.duration * 0.5 + startT;
         if(this.props.program.half == 1){
-            height += 1.5;
+            topPos = 1.5;
             endTime += 0.5;
             startString = startT + ":30";
         }
@@ -630,13 +709,13 @@ class Program extends Component {
         else endString = endTime + ":00";
         
         return(
-            <div onClick={this.handleProgram.bind(this)} className="progcontainer">
-                <div className="progFocus" style={{height: duration + "rem", top: height+"rem", width: "100%",left: leftPosition + "rem",position: "absolute", backgroundColor: getColor()}}>
-                    <div className="progbox">
+            <div onMouseLeave={this.mouseOut.bind(this)} onMouseOver={this.mouseIn.bind(this)}  onClick={this.handleProgram.bind(this)} className="progcontainer" style={{top: topPos + "rem"}}>
+                <div className="progFocus" style={{height: duration + "rem",  width: "100%", backgroundColor: getColor()}}>
+                    <div className="progbox2">
                         <div className="textInfo">
                             <div className="textCont">
                                 <div className="text1">{this.props.program.program}</div>
-                                <div className="text2"><div>{startString+ " - "+ endString}</div></div>
+                                <div className="text2"><div className="overflowtime">{startString+ " - "+ endString}</div></div>
                             </div>
                         </div>
                     </div>
@@ -658,11 +737,43 @@ class ScheduleFullTable extends Component {
 
         let weeknumber = this.props.dayStr.isoWeek();
         let dayString = {0:"Maanantai", 1:"Tiistai",2:"Keskiviikko",3:"Torstai",4:"Perjantai",5:"Lauantai",6:"Sunnuntai"};
+        let programStartDays = [];
+        console.log(this.props.progs);
+        const programs = this.props.progs.map((item) =>           
+           programStartDays.push(moment(item.localDate).day() + ":" + item.startTime + ":" + item.half) //Laitetaan ohjelmien viikot
+         
+        );
+
+        console.log(programStartDays);
 
         const cellHandler = (startTime,day, dayString) => e => {
             e.preventDefault();
-            this.props.show(startTime, day, dayString);
+            if(Array.from(document.getElementsByClassName("schedulertablehover")).length > 0) this.props.show(startTime, day, dayString);
         };
+
+        const putProgramIfExists = (dayOfWeek, timeOfDay) => {
+
+            console.log(programStartDays);
+            let indexOf = programStartDays.indexOf(dayOfWeek+":"+timeOfDay+":"+ "0");
+            let indexOfHalf = programStartDays.indexOf(dayOfWeek+":"+timeOfDay+":"+ "1");
+            //katsotaan onko päivälle ohjelmaa (Tasatunnein)
+            if(indexOf != -1){
+                console.log("DAY OF WEEK");
+                console.log(dayOfWeek);
+                console.log("timeOfDay");
+                console.log(timeOfDay);
+                console.log("indexOf");
+                console.log(indexOf);
+                return  <Program key={dayOfWeek+timeOfDay+"0"} half={0} dayOfW={dayOfWeek} showProgram={this.props.showProgram} program={this.props.progs[indexOf]}/>;
+            }
+            //katsotaan onko päivälle ohjelmaa (Puolitunnein aloitus)
+            if(indexOfHalf != -1){
+                return  <Program key={dayOfWeek+timeOfDay+"1"} half={1} dayOfW={dayOfWeek} showProgram={this.props.showProgram} program={this.props.progs[indexOfHalf]}/>;
+            }
+            else return "";
+
+            
+        }
 
         const generateHeader = (start,end,cur) => {
             let content = [];
@@ -687,14 +798,39 @@ class ScheduleFullTable extends Component {
 
             return content;
         };
-
+        
         const generateRows = () => {
             let content = [];
             let weekStartD = this.props.dayStr.format('DD.MM.YYYY'); 
-
             for (let i = 6; i <= 22; i++) {
-                content.push(<tr className="scheduletr" key={"row"+i}><td className='firstcellsize borderbottom'><p className="timetd">{i+":00"}</p></td><td onClick={cellHandler(i,dayString[0], weekStartD)} className="schedulertablehover cellsize"></td><td onClick={cellHandler(i,dayString[1],moment(weekStartD, "DD.MM.YYYY").add(1, 'days').format('DD.MM.YYYY'))} className="schedulertablehover cellsize"></td><td onClick={cellHandler(i,dayString[2],moment(weekStartD, "DD.MM.YYYY").add(2, 'days').format('DD.MM.YYYY'))} className="schedulertablehover cellsize"></td><td onClick={cellHandler(i,dayString[3],moment(weekStartD, "DD.MM.YYYY").add(3, 'days').format('DD.MM.YYYY'))} className="schedulertablehover cellsize"></td><td onClick={cellHandler(i,dayString[4],moment(weekStartD, "DD.MM.YYYY").add(4, 'days').format('DD.MM.YYYY'))} className="schedulertablehover cellsize"></td><td onClick={cellHandler(i,dayString[5],moment(weekStartD, "DD.MM.YYYY").add(5, 'days').format('DD.MM.YYYY'))} className="schedulertablehover cellsize"></td><td onClick={cellHandler(i,dayString[6],moment(weekStartD, "DD.MM.YYYY").add(6, 'days').format('DD.MM.YYYY'))} className="schedulertablehover cellsize"></td></tr>);
+                content.push(<tr className="scheduletr" key={"row"+i}>
+                                <td className='firstcellsize borderbottom'>
+                                    <p className="timetd">{i+":00"}</p>
+                                </td>
+                                <td onClick={cellHandler(i,dayString[0], weekStartD)} className="schecolumn schedulertablehover cellsize">
+                                    {putProgramIfExists(1, i)}
+                                </td>
+                                <td onClick={cellHandler(i,dayString[1],moment(weekStartD, "DD.MM.YYYY").add(1, 'days').format('DD.MM.YYYY'))} className="schecolumn schedulertablehover cellsize">
+                                    {putProgramIfExists(2, i)}
+                                </td>
+                                <td onClick={cellHandler(i,dayString[2],moment(weekStartD, "DD.MM.YYYY").add(2, 'days').format('DD.MM.YYYY'))} className="schecolumn schedulertablehover cellsize">
+                                    {putProgramIfExists(3, i)}
+                                </td>
+                                <td onClick={cellHandler(i,dayString[3],moment(weekStartD, "DD.MM.YYYY").add(3, 'days').format('DD.MM.YYYY'))} className="schecolumn schedulertablehover cellsize">
+                                    {putProgramIfExists(4, i)}
+                                </td>
+                                <td onClick={cellHandler(i,dayString[4],moment(weekStartD, "DD.MM.YYYY").add(4, 'days').format('DD.MM.YYYY'))} className="schecolumn schedulertablehover cellsize">
+                                    {putProgramIfExists(5, i)}
+                                </td>
+                                <td onClick={cellHandler(i,dayString[5],moment(weekStartD, "DD.MM.YYYY").add(5, 'days').format('DD.MM.YYYY'))} className="schecolumn schedulertablehover cellsize">
+                                    {putProgramIfExists(6, i)}
+                                </td>                                    
+                                <td onClick={cellHandler(i,dayString[6],moment(weekStartD, "DD.MM.YYYY").add(6, 'days').format('DD.MM.YYYY'))} className="schecolumn schedulertablehover cellsize">
+                                    {putProgramIfExists(0, i)}
+                                </td>
+                            </tr>);
             }
+
             return content;
         };
 

@@ -23,9 +23,15 @@ public interface GymProgramRepository extends CrudRepository<GymProgram, Long> {
   @Query(value = "select id from Program order by id desc limit 1", nativeQuery = true)
   public Long findHighestId();
   
+  /*
   @Modifying
   @Query(value = "UPDATE Program c SET c.program = 'jooo' WHERE c.id = 2", nativeQuery = true)
   public void updateProgram();
-  
+  */
+  @Modifying
+  //@Query(value = "DELETE FROM Program WHERE startTime = 11", nativeQuery = true)
+  @Transactional
+  @Query("DELETE FROM Program c WHERE c.id = ?1")
+  public void deleteProgram(Long id);
   
 }

@@ -31,6 +31,14 @@ public class User {
 	        orphanRemoval = true
 	    )
 	private List<GymProgram> programs = new ArrayList<>();
+	
+	@OneToMany(
+	        mappedBy = "user",
+    		fetch = FetchType.LAZY,
+	        cascade = CascadeType.ALL,
+	        orphanRemoval = true
+	    )
+	private List<Weight> weights = new ArrayList<>();
 /*
 	public void setPassword(String password) { 
 		
@@ -93,6 +101,15 @@ public class User {
 	public void setPrograms(List<GymProgram> programs) {
 		this.programs = programs;
 	}
+	
+	public List<Weight> getWeights() {
+		return weights;
+	}
+
+	public void setWeights(List<Weight> weights) {
+		this.weights = weights;
+	}
+	
 	
 	@Override
 	public String toString() {
