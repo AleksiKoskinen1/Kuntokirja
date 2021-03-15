@@ -29,7 +29,6 @@ class WeightManagment extends Component{
 	}
 	
 	loadWeightData() {
-		console.log(this.props.user.id);
 
 		api({method: 'GET', path: '/api/getUserWeightsWithMY/'+this.state.year+'/'+this.state.month+'/'+this.props.user.id}).done(response => {
 			this.setState({
@@ -52,7 +51,6 @@ class WeightManagment extends Component{
 
 	addRow(weightToAdd){
 
-		console.log(weightToAdd);
 		api({method: 'POST', path: '/api/postWeight/'+ this.props.user.id + '/' + weightToAdd.date + '/' + weightToAdd.weight + '/'}).done(() => {
 			this.loadWeightData();	
 			window.location = "#"; //poistetaan dialogi
@@ -89,7 +87,6 @@ class WeightManagment extends Component{
 	}
 
 	//Poistetaan paino
-
 	deleteWeight(id) {
 		api({method: 'DELETE', path: '/api/delWeight/'+id}).done(() => {
             this.loadWeightData();
@@ -97,6 +94,8 @@ class WeightManagment extends Component{
 	}
 	//Muokataan painoa
 	editWeight(id, weight) {
+		console.log(id);
+		console.log(weight);
 		api({method: 'POST', path: '/api/editWeight/'+id+'/'+weight}).done(() => {
 			this.loadWeightData();
 			window.location = "#"; //poistetaan dialogi
@@ -141,10 +140,6 @@ class WeightManagment extends Component{
 
 		if(countCharW < 300) countCharW = 300;  //Jotta ei mene liian pieneksi taulukko, jos esim on laitettu vain 1 paino
 		if(countCharW > 700) countCharW = 700;  //Eikä liian suureksi..voisi olli myös vakio 700 mutta joo mennää thäl
-		console.log(minYvalue);
-		console.log(maxYvalue);
-		console.log(this.state.weights);
-		console.log(data);
 
 		return (
 			
@@ -194,7 +189,7 @@ class Weight extends Component{
 
 	constructor(props) {
 		super(props);
-		
+
 		this.wSpan = null;
 		this.weightP = null;
 		this.setWSpan = element => { this.wSpan = element; };
@@ -207,8 +202,7 @@ class Weight extends Component{
 	}
 	edit(e) {
 		e.preventDefault();
-
-	
+		
 		//Katsotaan, että on syötetty validi float numero 
 		if(!/^\-?[0-9]+(e[0-9]+)?(\.[0-9]+)?$/.test(this.weightP.value)){
 			this.wSpan.style="color:red";
@@ -233,18 +227,22 @@ class Weight extends Component{
 
 		};
 
-		
-		return (
+		const divID = (choice) => {
+			if(choice) return "#editWeight" + this.props.weight.id;
+			else return "editWeight" + this.props.weight.id;
+		}
+
+		return (			
 			<tr>
 				<td>{dayString()}</td>
 				<td>{this.props.weight.weight} kg</td>
 				<td>
 					<input onClick={this.delete.bind(this)} className="talImages pointer" type="image" src="trash.png" alt="Poista" title="Poista paino" width="15" height="15"></input>
-					<a href="#editWeight">
+					<a href={divID(true)}>
 						<img src="edit.png" alt="Muokkaa" title="Muokkaa painoa" width="15" height="15" className="logout-icon"></img>
 					</a>
 					<div>
-						<div id="editWeight" className="modalDialog">
+						<div id={divID(false)} className="modalDialog">
 							<div>
 								<a href="#" title="Sulje" className="close">X</a>
 
@@ -254,7 +252,7 @@ class Weight extends Component{
 									<span ref={this.setWSpan} className="inputInfo">Syötä uusi paino kiloina esim. 95.40</span>
 									<p>
 										<input ref={this.setWDiv} type="text" placeholder="Paino" className="field"/>
-									</p>
+									</p>								
 
 									<button onClick={this.edit.bind(this)}>Lisää</button>
 								</form>
@@ -299,8 +297,6 @@ class AddWeight extends Component {
 		e.preventDefault();
 	
 		var newWeight = {};
-		console.log(this.dateDiv.value);
-		console.log(this.weightDiv.value);
 		//Katsotaan että pvm on syötetty pyydetyssä muodossa, ja on muutenkin validi pvm
 		if(!moment(this.dateDiv.value, "DD.MM.YYYY", true).isValid()){
 			this.dateSpan.style="color:red";
@@ -345,13 +341,7 @@ class AddWeight extends Component {
         }
 		
 		return (
-			/*
-						<img src="/barbell.jpg" width="20" height="20" className="logout-icon"></img>
-						<input className="weightIput" type="text" placeholder="Näytä" ref="showN" defaultValue={this.props.pageSize} onInput={this.handleInput}/>
-					
-					<input className="weightIput" type="text" placeholder="Näytä" ref="showN" defaultValue={this.props.pageSize} onInput={this.handleInput}/>
-
-						*/
+		
 			<div id="addR">
 				<div>
 					<label className="wLabelLeft">Vuosi:</label>

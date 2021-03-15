@@ -102,7 +102,6 @@ class Login extends Component{
             return;
         }
 
-        console.log('/api/createNewUser/'+this.newUsername.value + '/' +this.newPassword.value);
         api({method: 'POST', path: '/api/createNewUser/'+this.newUsername.value + '/' +this.newPassword.value}).done(results => {
             
             //Katsotaan onko username varattu

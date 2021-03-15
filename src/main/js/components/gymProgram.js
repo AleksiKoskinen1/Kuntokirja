@@ -52,20 +52,11 @@ class GymProgram extends Component{
 
     loadGymData2(id = false) {
 
-    //    let right = this.calDiv.getBoundingClientRect().right;
-    //    right += 400;
-    //    let size = "full";
-    //    console.log("right: " +right);
-    //    console.log("SIZE!!" + size);
-    //    console.log("winddow!!" + window.innerWidth);
-   //     if(window.innerWidth < right ) size= "small";
-   //     console.log(this.props.user);
         let calW = this.calDiv.clientWidth;
         let minWi = 298;
         let size = "full";
         if(calW < minWi) size= "small";
 
-     //   console.log("SIZE11!!" + size);
         let startOfWeek = moment(this.state.date).startOf('isoweek');
         let dayS = startOfWeek;
         let endOfWeek = moment(this.state.date).endOf('isoweek');
@@ -189,25 +180,17 @@ class GymProgram extends Component{
     }
 
     checkSize(){
-      /*  let right = this.calDiv.clientWidth;
-        console.log("TABLE right: " +right);
-        right += 400;
-        console.log("window width: " +window.innerWidth);  */
-     //   console.log(this.state);
 
         let calWidth = this.calDiv.clientWidth;
         let minW = 298;
         let minWindowW = 1390;
-    //    console.log("calWidth: " +calWidth);
-     //   console.log("window width: " +window.innerWidth);
+
         if(calWidth < minW && window.innerWidth < minWindowW && this.state.mainContentSize != "small"){
-         //   console.log("checkSizeSMALL");
             this.setState({
                 mainContentSize: "small"
             });
         }
         else if(calWidth > minW && window.innerWidth > minWindowW && this.state.mainContentSize != "full"){
-       //     console.log("checkSizeFULL");
             this.setState({
                 mainContentSize: "full"
             });
@@ -233,13 +216,11 @@ class GymProgram extends Component{
     }
 
     saveEdits(id, title, content){
-     
-        console.log(id);
+    
         fetch(api, root, [
 			{rel: 'gymPrograms'}]
 		).done(results => {              
             api({method: 'GET', path: results.url + "/"+id}).done(program => {
-           //     console.log(program);
                 let entity = program.entity;
                 entity.program = title;
                 entity.subject = content;
@@ -263,8 +244,6 @@ class GymProgram extends Component{
         let mainB = "mainBody";
         if(size == "small") mainB = "mainBodySm";
 
-        console.log(this.state);
-     //   console.log("RENDER + sIZE : " + size);
         const stickyNotes = () => {
             if(this.state.showNote){
                 return <StickyNote size={size} key={this.state.note.id} note={this.state.note} saveEdits={this.saveEdits} deleteProgram={this.deleteProgram}/>;
@@ -398,23 +377,17 @@ class StickyNote extends Component {
 
     checkSize(){
 
-     //   console.log(this.timeDiv.getBoundingClientRect());
         let timeDiv = this.timeDiv.getBoundingClientRect().right + 20;
         let butDiv = this.butDiv.getBoundingClientRect().left;
         let total = this.timeDiv.offsetWidth + this.butDiv.offsetWidth + 20;
-     /*   console.log(total);
-        console.log(this.contDiv.offsetWidth);
-        console.log(timeDiv);
-        console.log(butDiv);*/
+
         if(butDiv < timeDiv){  //Liian pieni näkymä napeille in here
-          //  console.log("SMALL");
             this.setState({
                 small: true,
                 smallSizeLimit: this.contDiv.offsetWidth
             });
         }
         else if(this.state.small && this.contDiv.offsetWidth > this.state.smallSizeLimit){
-           // console.log("FULL");
             this.setState({
                 small: false
             });
@@ -738,13 +711,10 @@ class ScheduleFullTable extends Component {
         let weeknumber = this.props.dayStr.isoWeek();
         let dayString = {0:"Maanantai", 1:"Tiistai",2:"Keskiviikko",3:"Torstai",4:"Perjantai",5:"Lauantai",6:"Sunnuntai"};
         let programStartDays = [];
-        console.log(this.props.progs);
         const programs = this.props.progs.map((item) =>           
            programStartDays.push(moment(item.localDate).day() + ":" + item.startTime + ":" + item.half) //Laitetaan ohjelmien viikot
          
         );
-
-        console.log(programStartDays);
 
         const cellHandler = (startTime,day, dayString) => e => {
             e.preventDefault();
@@ -753,17 +723,10 @@ class ScheduleFullTable extends Component {
 
         const putProgramIfExists = (dayOfWeek, timeOfDay) => {
 
-            console.log(programStartDays);
             let indexOf = programStartDays.indexOf(dayOfWeek+":"+timeOfDay+":"+ "0");
             let indexOfHalf = programStartDays.indexOf(dayOfWeek+":"+timeOfDay+":"+ "1");
             //katsotaan onko päivälle ohjelmaa (Tasatunnein)
             if(indexOf != -1){
-                console.log("DAY OF WEEK");
-                console.log(dayOfWeek);
-                console.log("timeOfDay");
-                console.log(timeOfDay);
-                console.log("indexOf");
-                console.log(indexOf);
                 return  <Program key={dayOfWeek+timeOfDay+"0"} half={0} dayOfW={dayOfWeek} showProgram={this.props.showProgram} program={this.props.progs[indexOf]}/>;
             }
             //katsotaan onko päivälle ohjelmaa (Puolitunnein aloitus)
@@ -826,7 +789,7 @@ class ScheduleFullTable extends Component {
                                     {putProgramIfExists(6, i)}
                                 </td>                                    
                                 <td onClick={cellHandler(i,dayString[6],moment(weekStartD, "DD.MM.YYYY").add(6, 'days').format('DD.MM.YYYY'))} className="schecolumn schedulertablehover cellsize">
-                                    {putProgramIfExists(0, i)}
+                                    {putProgramIfExists(0, i)} 
                                 </td>
                             </tr>);
             }

@@ -88,7 +88,7 @@ class TopSection extends Component{
 	constructor(props) {
 
 		super(props);
-		this.state = {	small : false,/* headOver : false ,*/ headStyle: {} ,/* headReverse: "",*/ smallSizeLimit: 772/*, navLenght: ""*/};
+		this.state = {	small : false, headStyle: {} , smallSizeLimit: 772};
 		this.navDiv = null;
 		this.headerDiv = null;
 		this.logBut = null;
@@ -117,55 +117,8 @@ class TopSection extends Component{
 			let navRight = this.navDiv.getBoundingClientRect().right;
 			let logButLeft = this.logBut.getBoundingClientRect().left;
 		
-		/*	console.log("headRIGHT : " + headRight);
-			console.log("headLeft : " + headLeft);
-			console.log("navRight : " + navRight);
-			console.log("logButLeft : " + logButLeft);
-			
-			console.log(this.state);
-			console.log("WINDOW: " + window.innerWidth);
-			console.log("headerDiv WIDTH:" + this.headerDiv.offsetWidth);
-			console.log("navDiv WIDTH:" + this.navDiv.offsetWidth);
-			console.log("logBut WIDTH:" + this.logBut.offsetWidth);
-			console.log("nameEle WIDTH:" + this.nameEle.offsetWidth);*/
 			let total = this.headerDiv.offsetWidth + this.navDiv.offsetWidth + this.logBut.offsetWidth + this.nameEle.offsetWidth + 120;
-		//	console.log("total: " +total);
-			/*
-			console.log(this.headerDiv.getBoundingClientRect());
-			console.log(this.navDiv.getBoundingClientRect());
-			console.log(this.logBut.getBoundingClientRect());
-			console.log(this.nameEle.getBoundingClientRect());*/
-		//	let x = (window.innerWidth - 218) / 2;
-		//	console.log("X:" + x);
-	/*		if(window.innerWidth < this.state.smallSizeLimit || logButLeft < headRight){
-				console.log("JOO1");
-				this.setState({
-					headOver: false,
-					small: true,
-					smallSizeLimit: total,
-					headStyle: {},
-				//	navLenght: navRight
-				});	
-			}
-			else if(headLeft < 320){ 
-				console.log("JOO2");
-				this.setState({
-					headOver: false,
-					headStyle: {'left': 320, 'transform': 'translate(0%, -0%)' },
-					smallSizeLimit: total,
-				//	headReverse: logButLeft
-				});
-			}
-			else if(x > 329 && !this.state.headOver){ 
-				console.log("JOO3");
-				this.setState({
-					headOver: true,
-					headStyle: {'left': '50%', 'transform': 'translate(-50%, -0%)' },
-					smallSizeLimit: total,
-				//	headReverse: logButLeft
-				});
-			}
-			else */
+
 			if(total > window.innerWidth){
 				this.setState({
 					small: true,
@@ -179,60 +132,14 @@ class TopSection extends Component{
 					small: true,
 					smallSizeLimit: window.innerWidth,
 					headStyle: {'position': "absolute", 'left': '50%',  'transform': 'translate(-50%, -0%)' }
-				//	navLenght: navRight
 				});	
 			}
-		/*	
-			if(window.innerWidth < 772 || logButLeft < headRight){
-				console.log("JOO1");
-				this.setState({
-					small: true,
-				//	smallSizeLimit: window.innerWidth,
-					headStyle: {},
-					navLenght: navRight
-				});	
-			}
-			else if(headLeft < navRight && !this.state.headOver){ 
-				console.log("JOO2");
-				this.setState({
-					headOver: true,
-					headStyle: {'left': navRight, 'transform': 'translate(0%, -0%)' },
-					headReverse: logButLeft
-				});
-			}
-			else if(this.state.headOver && logButLeft > this.state.headReverse){
-				console.log("JOO3");
-				this.setState({
-					headOver: false,
-					headStyle: {'left': '50%', 'transform': 'translate(-50%, -0%)' },
-					headReverse: logButLeft
-				});	
-			}*/
-		/*	if(logButLeft < headRight){
-				console.log("JOO3");
-				this.setState({
-					small: true,
-					smallSizeLimit: window.innerWidth,
-					headStyle: {},
-					navLenght: navRight
-				});	
-			}*/
+	
 
 		}
 		// Jos ollaan pienessä näkymässä
 		else if(this.state.small && window.innerWidth > this.state.smallSizeLimit){
-		/*	if(headLeft < 320){ 
-				this.setState({
-					small: false,
-					headStyle: {'left': '320px', 'transform': 'translate(0%, -0%)' }
-				});
-			}
-			else{
-				this.setState({
-					small: false,
-					headStyle: {'left': '50%', 'transform': 'translate(-50%, -0%)' },
-				});
-			}*/	
+	
 			this.setState({
 				small: false,
 				headStyle: {},
