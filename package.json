@@ -23,12 +23,14 @@
   },
   "scripts": {
     "build": "webpack -p",
-    "watch": "webpack --watch -d --output ./target/classes/static/built/bundle.js"
+    "watch": "webpack --watch -d --output ./target/classes/static/built/bundle.js",
+    "buildES5": "@babel testSRC -d src2"
   },
   "devDependencies": {
-    "@babel/core": "^7.1.0",
-    "@babel/preset-env": "^7.1.0",
-    "@babel/preset-react": "^7.0.0",
+    "@babel/cli": "^7.0.0",
+    "@babel/core": "^7.13.10",
+    "@babel/preset-env": "^7.0.0",
+    "@babel/preset-react": "^7.12.13",
     "babel-loader": "^8.0.2",
     "webpack": "^4.19.1",
     "webpack-cli": "^3.1.0"

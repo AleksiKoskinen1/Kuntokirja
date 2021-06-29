@@ -4,6 +4,8 @@ import java.util.*;
 
 import javax.persistence.*;
 
+import org.springframework.context.annotation.Bean;
+
 //import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 ///import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -22,7 +24,7 @@ public class User {
 	private String name; 
 
 //	private @JsonIgnore String password; 
-	private String password; 
+	private @JsonIgnore String password; 
 	
 	@OneToMany(
 	        mappedBy = "user",
@@ -45,13 +47,15 @@ public class User {
 	//	this.password = PASSWORD_ENCODER.encode(password);
 	}
 */
-	private User() {}
+	public User() {}
 
 	public User(String name, String password/*, String... roles*/) {
 		this.name = name;
 		this.password = password;  //Encode later
 	//	this.setPassword(password);
 	}
+	
+	
 
 	@Override
 	public boolean equals(Object o) {
@@ -114,11 +118,7 @@ public class User {
 	@Override
 	public String toString() {
 		
-		return "User{" +
-				"id=" + this.id +
-			", pass=" + this.password +
-			", name='" + this.name + //'\'' +
-			//", programs=" + this.programs.toString() +
-			'}';
-	}
+		return ""+ this.id +"";
+	} 
+
 }

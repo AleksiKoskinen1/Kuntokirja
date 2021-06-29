@@ -6,6 +6,7 @@ const ReactDOM = require('react-dom');
 const client = require('./api');  //Haetaan modulit	
 const follow = require('./fetch');
 const root = '/api';
+const api = require('./api'); 
 const when = require('when');
 import WeightManagment from './components/weightManagment';
 import GymProgram from './components/GymProgram';
@@ -15,16 +16,44 @@ class App extends Component {
 
 	constructor(props) {
 		super(props);
-		this.state = {	loggedIn: false,
-						page: 1, //kuntosaliohjelma oletuksena
-						user: null
-					};
+
+		this.state = {	
+			loggedIn: false,
+			page: 1, //kuntosaliohjelma oletuksena
+			user: null,
+			session: false
+		};
+
+		this.checkSession();
+		
 		this.viewChange = this.viewChange.bind(this);	
 		this.login = this.login.bind(this);	
 		this.logOut = this.logOut.bind(this);		
 		
 	}
 
+	checkSession(){
+
+		api({method: 'GET', path: '/api/getSession/'}).done(results => {
+				
+			if(results.entity == null){
+				this.setState({
+					loggedIn: false,
+					page: 1,
+					user: null,
+					session: true
+				});
+			}
+			else{
+				this.setState({
+					loggedIn: true,
+					page: 1,
+					user: results.entity,
+					session: true
+				});
+			}
+		});
+	}
 
 	viewChange(id) {
 		this.setState({page: id});
@@ -33,11 +62,15 @@ class App extends Component {
 	logOut(e){
 
 		e.preventDefault();	
-		this.setState({
-			loggedIn: false,
-			page: 1,
-			user: null
-		});
+
+	 	api({method: 'GET', path: '/api/logout/'}).done(() => {            
+            this.setState({
+				loggedIn: false,
+				page: 1,
+				user: null
+			});
+        });
+		
 	}
 
 	login(results){
@@ -52,30 +85,39 @@ class App extends Component {
 
 	render() {
 
-		if(this.state.loggedIn){
+		if(this.state.session){
+		
+			if(this.state.loggedIn){
 
-			let page = this.state.page;
+				let page = this.state.page;
 
-			const renderView = () =>{
-				if(page == 1) return <GymProgram user={this.state.user}/>
-				if(page == 3) return <WeightManagment user={this.state.user}/>
+				const renderView = () =>{
+					if(page == 1) return <GymProgram user={this.state.user}/>
+					if(page == 3) return <WeightManagment user={this.state.user}/>
+				}
+
+				return (
+					<div id="mainDiv">								
+						<TopSection name={this.state.user.name} page={this.state.page}  logOut={this.logOut}  viewChange={this.viewChange}/>	
+						{renderView()}
+					</div>
+				)
+				
+			}
+			else if(!this.state.loggedIn){
+				return(
+					<div className="bgColor">
+						<Login login={this.login} />
+					</div>
+				)
 			}
 
-			return (
-				<div id="mainDiv">								
-					<TopSection name={this.state.user.name} page={this.state.page}  logOut={this.logOut}  viewChange={this.viewChange}/>	
-					{renderView()}
-				</div>
-			)
-			
 		}
-		else if(!this.state.loggedIn){
-			return(
-				<div className="bgColor">
-					<Login login={this.login} />
-				</div>
-			)
+		else{
+			return (<div></div>)
 		}
+
+		
 		
 	}
 }

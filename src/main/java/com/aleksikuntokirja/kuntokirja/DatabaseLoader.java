@@ -35,9 +35,9 @@ public class DatabaseLoader implements CommandLineRunner {
 	public void run(String... strings) throws Exception {
 		//this.weightRepository.save(new Weight(121, "13.07.2020"));  //Linkitetään useriin later
 		//this.weightRepository.save(new Weight(107, "23.08.2020"));
-		
+		 
 	
-		User u = new User("demo", "pass");
+	/*	User u = new User("demo", "pass");
 		System.out.println(u);
 		
 		long millis=System.currentTimeMillis();  
@@ -106,14 +106,14 @@ public class DatabaseLoader implements CommandLineRunner {
 		List<GymProgram> prs2 = Arrays.asList(g13, g14);
 		
 		u2.setPrograms(prs2);
-		
+		*/
 	/*	Weight w11 = new Weight(117, (java.sql.Date) date, u2);
 		Weight w12 = new Weight(113,  (java.sql.Date) date, u2);
 		List<Weight> wgs2 = Arrays.asList(w11,w12);	
 		
 		u2.setWeights(wgs2);*/
-		userRepository.save(u2);
+	/*	userRepository.save(u2);
 		
-		
+		*/
 	}
 }
