@@ -201,14 +201,23 @@ table {
 .field {
   width: 90%;
 }
+
+.field2 {
+  width: 3rem;
+}
 .talImages{
   margin-right:0.4rem
 }
 
 .finishMargin{
+  margin-left: 3.91rem;
+}
+.finishMargin2{
   margin-left: 2rem;
 }
-
+.finishMargin3{
+  margin-left: 1.77rem;
+}
 .timesSelect{
   height: 1.5rem;
 }
@@ -611,15 +620,8 @@ table {
   background-color: #e6e6e6;
 }
 
-
-
-.progcontainer {
-  position: relative;
-  height: 2.92rem;
-}
-
-.progcontainer:hover {
-  cursor: pointer;
+.progbox2{
+  height: inherit;
 }
 
 .progbox {
@@ -639,6 +641,7 @@ table {
   background-clip: padding-box;
 }
 .textInfo {
+  height: auto;
   color: #fff;
   display: flex;
   padding: 4px 8px;
@@ -668,9 +671,35 @@ table {
   text-overflow: ellipsis;
 }
 
-.progFocus:hover{
-  outline: 2px solid black;
+
+.progcontainer {
+  position: relative;
+  height: 2.92rem;
 }
+
+.progcontainer2 {
+  position: relative;
+  height: 1.45rem;
+}
+
+.progcontainer3 {
+  position: relative;
+  height: 1.45rem;
+  top: 0.73rem;
+}
+
+/*
+.progcontainer:hover {
+  cursor: pointer;
+}*/
+
+.progFocus:hover{
+  outline: 1px solid black;
+  position: relative;
+  z-index:999;
+  cursor: pointer;
+}
+
 .schedulertablehover:hover{ 
   cursor: pointer;
   background: lightblue;
@@ -690,7 +719,7 @@ table {
 }
 
 .sticky-note { 
-  height: 28rem;
+  height: 29rem;
  /* width: 22rem;*/
   width: 100%;
   color: black;
@@ -723,7 +752,7 @@ table {
   padding: 1px;
 }
 .contents { background: white; margin: 20px; outline: none; height:21rem; margin-bottom: 0px; overflow: auto;}
-.contentsSm { background: white; margin: 20px; outline: none; height:9.6rem; margin-bottom: 0px; overflow: auto;}
+.contentsSm { background: white; margin: 20px; outline: none; height:8.6rem; margin-bottom: 0px; overflow: auto;}
 .handle { 
   background: rgb(213,245,44);
   background: linear-gradient(90deg, rgba(213,245,44,1) 0%, rgba(152,209,49,1) 45%, rgba(213,245,44,1) 100%);
@@ -740,7 +769,7 @@ table {
 
 .programDataBtns{
   float: right;
-  margin: 13px 20px 0px 0px;
+  margin: 22px 20px 0px 0px;
 }
 
 .navbar {
@@ -785,4 +814,44 @@ table {
 .dropdown:hover .dropdown-content {display: block;}
 .dropdown:hover .navbar {background-color: lightblue;}
 
-  
+.passbottom {
+  margin-bottom: 0px !important;
+}
+
+.password-strength-meter {
+  text-align: left;
+}
+
+.password-strength-meter-progress {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22.9em;
+  height: 8px;
+}
+
+.password-strength-meter-progress::-webkit-progress-bar {
+  background-color: #eee;
+  border-radius: 5px;
+}
+
+.password-strength-meter-label {
+  font-size: 14px;
+}
+
+.password-strength-meter-progress::-webkit-progress-value {
+  border-radius: 2px;
+  background-size: 35px 20px, 100% 100%, 100% 100%;
+}
+
+.strength-Heikko::-webkit-progress-value {
+  background-color: #F25F5C;
+}
+.strength-Kohtalainen::-webkit-progress-value {
+  background-color: #FFE066;
+}
+.strength-Hyvä::-webkit-progress-value {
+  background-color: #247BA0;
+}
+.strength-Vahva::-webkit-progress-value {
+  background-color: #00c030;
+}

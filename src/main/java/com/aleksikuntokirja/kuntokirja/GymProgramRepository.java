@@ -17,8 +17,11 @@ public interface GymProgramRepository extends CrudRepository<GymProgram, Long> {
   @Query("select i from Program i where i.localdate >= ?1 AND i.localdate <= ?2")
   public List<GymProgram> getProgramsWithDates(LocalDate startDate, LocalDate endDate);  
   
-  @Query(value = "SELECT * FROM Program where localdate >= ?1 AND localdate <= ?2 AND user_id = ?3", nativeQuery = true)
+  @Query(value = "SELECT * FROM Program where localdate >= ?1 AND localdate <= ?2 AND user_id = ?3 AND (repeatance = 1 OR rep_duration = 1 OR rep_duration = 0)", nativeQuery = true)
   public List<GymProgram> getUserProgramsWithDates(LocalDate startDate, LocalDate endDate, Integer id);
+  
+  @Query(value = "SELECT * FROM Program where localdate <= ?2 AND rep_end_time >= ?1 AND user_id = ?3 AND repeatance != 1 AND rep_duration != 1 AND rep_duration != 0", nativeQuery = true)
+  public List<GymProgram> getUserRepeatanceProgramsWithDates(LocalDate startDate, LocalDate endDate, Integer id);
    
   @Query(value = "select id from Program order by id desc limit 1", nativeQuery = true)
   public Long findHighestId();

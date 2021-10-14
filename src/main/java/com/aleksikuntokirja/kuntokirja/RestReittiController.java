@@ -1,9 +1,13 @@
 package com.aleksikuntokirja.kuntokirja;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.persistence.Column;
@@ -59,7 +63,7 @@ public class RestReittiController {
 		List<String> id  = new ArrayList<>();
     
 		if(!user.isEmpty()) { //Käyttäjätunnus oli olemassa, katsotaan salasana (Duplikaatteja ei pitäisi koskaan mennä)
-			System.out.println(user.get(0).getPassword());
+			
 			if(passwordEncoder.matches(password, user.get(0).getPassword()) == true) {  //Katsotaan, onko encoodattu salasana oikea
 				
 				id.add(user.toString());
@@ -94,18 +98,12 @@ public class RestReittiController {
 	@PostMapping(path = "/api/createNewUser/{username}/{password}")
 	public boolean addUser(@PathVariable String username,@PathVariable String password) {		
 		
-		System.out.println("USER: " + username);
-		System.out.println("PASS: " + password);
-		
 		List<User> user = userrepo.findByName(username);
 		if (user.isEmpty()) {  //Katsotaan, että onko käyttäjätunnus varattu
 		
-			System.out.println("empty");
 			User newuser = new User();
 			newuser.setName(username);
-			System.out.println("empty2");
 			newuser.setPassword(passwordEncoder.encode(password));
-			System.out.println("empty3");
 			userrepo.save(newuser);  
 			return true;
 		}
@@ -128,6 +126,70 @@ public class RestReittiController {
 		wrepo.updateWeight(id, weight); 		
 	}
 	
+	@SuppressWarnings("null")
+	@GetMapping("/api/getUserRepeatanceProgramsWithDates/{startDate}/{endDate}/{id}")
+	public List<Object> getUserRepeatanceProgramsWithDates(@PathVariable String startDate, @PathVariable String endDate, @PathVariable Integer id){
+			
+		//Tässä haettu jokainen toistuva ohjelma (Ei haeta muita). Katsotaan jokainen läpi ja jos osuu valitulle viikolle, otetaan mukaan
+		List<GymProgram> weekPrograms = gymrepo.getUserRepeatanceProgramsWithDates(LocalDate.parse(startDate),LocalDate.parse(endDate), id); 
+		List<Object> newList = new ArrayList<Object>();
+		
+		String [] sDates = startDate.split("-", 5); //Pisteen splittaus vaatii \\ eteen
+		String [] eDates = endDate.split("-", 5); //Pisteen splittaus vaatii \\ eteen
+				
+		LocalDate locS = LocalDate.of(Integer.parseInt(sDates[0]), Integer.parseInt(sDates[1]), Integer.parseInt(sDates[2]));   
+		LocalDate locE = LocalDate.of(Integer.parseInt(eDates[0]), Integer.parseInt(eDates[1]), Integer.parseInt(eDates[2]));   
+		locE = locE.plus(1, ChronoUnit.DAYS);  //Jotta silmukat käy vikan päivän läpi
+		
+		List<GymProgram> programList = new ArrayList<GymProgram>();
+		List<Object> timeList = new ArrayList<Object>();
+		
+		for (int i = 0; i < weekPrograms.size(); i++){
+			Integer rep = weekPrograms.get(i).getRepeatance(); 
+			Integer repDur = weekPrograms.get(i).getRepDuration() + 1;  //while silmukka ottaa vikan
+			
+			List<String> progStrings = new ArrayList<String>();
+			
+			locS = LocalDate.of(Integer.parseInt(sDates[0]), Integer.parseInt(sDates[1]), Integer.parseInt(sDates[2])); //Laitetaan lähtökohtaan takas
+			
+			GymProgram singleProgram = weekPrograms.get(i);
+			programList.add(singleProgram);
+			
+			LocalDate programDate =  singleProgram.getLocalDate();			
+			int dayOfWeek = 0;
+				
+			while( !locS.equals(locE) ) {  //Käydään jokainen päivä läpi yksitellen
+				int repDurStart = 1;
+				programDate = singleProgram.getLocalDate();
+				String one = "";
+				dayOfWeek++;
+				while(repDurStart != repDur) {						
+					if(locS.equals(programDate)) {
+						
+						if(dayOfWeek == 7) dayOfWeek = 0; //Viikko alkaa 0 päivästä
+						one = dayOfWeek + "-" + singleProgram.getStartTime() + "-" + singleProgram.getHalf() + ":" + i;  
+						progStrings.add(one);
+					}
+					
+					repDurStart++;
+					
+					if(rep == 2) programDate = programDate.plus(1, ChronoUnit.DAYS);  //Katsotaan milloin on lopetus päivä, eli lisätään päiviä keston verran
+					else if(rep == 3) programDate = programDate.plus(1, ChronoUnit.WEEKS);
+					else if(rep == 4) programDate = programDate.plus(4, ChronoUnit.WEEKS);  //LAsketaan 1 kuukausi = 4 viikkoa. Pysyy päivä samana ainakin
+				}
+				
+				locS = locS.plus(1, ChronoUnit.DAYS);  //Katsotaan milloin on lopetus päivä, eli lisätään päiviä keston verran
+			}
+				
+			timeList.add(progStrings);			
+		}
+				
+		newList.add(programList);
+		newList.add(timeList);
+		
+		return newList;
+		
+	}
 	
 	@GetMapping("/api/getUserProgramsWithDates/{startDate}/{endDate}/{id}")
 	public List<GymProgram> getUserProgramsWithDates(@PathVariable String startDate, @PathVariable String endDate, @PathVariable Integer id){
@@ -182,10 +244,37 @@ public class RestReittiController {
 		}
 	}
 	
-	@PostMapping(path = "/api/postProgram/{id}/{subject}/{program}/{start}/{end}/{date}")
-	public void addProgramToUser(@PathVariable Long id, @PathVariable String subject,@PathVariable String program,@PathVariable String start,@PathVariable String end,@PathVariable String date) {
+	/*
+	 * Toistuvuus (repeatance)
+	 * 1 = Kerran 
+	 * 2 = Päivittäin
+	 * 3 = Viikottain
+	 * 4 = Kuukausittain
+	 */
+	@PostMapping(path = "/api/postProgram/{id}/{subject}/{program}/{start}/{end}/{date}/{repeatance}/{repDuration}")
+	public void addProgramToUser(@PathVariable Long id, @PathVariable String subject,@PathVariable String program,@PathVariable String start,@PathVariable String end,@PathVariable String date,@PathVariable Integer repeatance,@PathVariable Integer repDuration) {
+		
+		LocalDate durEndDate = null;
+		LocalDate pStartDate = null;
 		
 		String [] dates = date.split("\\.", 5); //Pisteen splittaus vaatii \\ eteen
+		
+		pStartDate = LocalDate.of(Integer.parseInt(dates[2]), Integer.parseInt(dates[1]), Integer.parseInt(dates[0]));
+		
+		if(repeatance == 1 || repDuration == 1 || repDuration == 0) durEndDate = pStartDate;
+		else {
+			
+			if(repeatance == 2) {
+				durEndDate = pStartDate.plus(repDuration, ChronoUnit.DAYS);  //Katsotaan milloin on lopetus päivä, eli lisätään päiviä keston verran
+			}
+			else if(repeatance == 3) {
+				durEndDate = pStartDate.plus(repDuration, ChronoUnit.WEEKS);  //Katsotaan milloin on lopetus päivä, eli lisätään viikkoja keston verran
+			}
+			else if(repeatance == 4) {
+				durEndDate = pStartDate.plus(repDuration * 4, ChronoUnit.WEEKS);  //Katsotaan milloin on lopetus päivä, eli lisätään kuukausia keston verran
+			}
+			durEndDate = durEndDate.minus(1, ChronoUnit.DAYS);  //Jotta ei tule yhtä päivää liikaa (Lasketaan aloituspäivä mukaan)
+		}
 		
 		int half = 0, duration = 0;
 		String startHalf = "00", endHalf = "00";
@@ -204,7 +293,7 @@ public class RestReittiController {
 		Optional<User> user = userrepo.findById(id);
 		if (user.isPresent()) {
 		    User curUser = user.get();
-		    gymrepo.save(new GymProgram(Integer.parseInt(startTimes[0]), duration, half, program,  subject, LocalDate.of(Integer.parseInt(dates[2]), Integer.parseInt(dates[1]), Integer.parseInt(dates[0])), curUser));
+		    gymrepo.save(new GymProgram(Integer.parseInt(startTimes[0]), duration, half, subject,  program, pStartDate, curUser, repeatance, repDuration, durEndDate));
 		}
 	}
 	

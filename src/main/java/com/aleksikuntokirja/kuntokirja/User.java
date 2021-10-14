@@ -15,15 +15,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Table(name = "user_entity")
 public class User {
 
-//	public static final PasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder(); 
-
 	@Id 
 	@GeneratedValue(strategy = GenerationType.AUTO) 
 	private Long id; 
 
 	private String name; 
 
-//	private @JsonIgnore String password; 
 	private @JsonIgnore String password; 
 	
 	@OneToMany(
@@ -41,18 +38,12 @@ public class User {
 	        orphanRemoval = true
 	    )
 	private List<Weight> weights = new ArrayList<>();
-/*
-	public void setPassword(String password) { 
-		
-	//	this.password = PASSWORD_ENCODER.encode(password);
-	}
-*/
+	
 	public User() {}
 
-	public User(String name, String password/*, String... roles*/) {
+	public User(String name, String password) {
 		this.name = name;
-		this.password = password;  //Encode later
-	//	this.setPassword(password);
+		this.password = password;  
 	}
 	
 	

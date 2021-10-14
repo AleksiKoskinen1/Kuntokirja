@@ -31,15 +31,11 @@ public class ReittiController {
         final List<String> id = (List<String>) session.getAttribute(MY_SESSION_USER_ID);
         
         if( !CollectionUtils.isEmpty(id)) {
-        	System.out.println(id.toString());
-        	
         	return "index";
         }
         else return "index";      // Ei sessiota, laitetaan aloitussivu.
     }
 
-    
-    
 	
 	@RequestMapping(value = "/idle") //reittien root
 	public String idle() {

@@ -5,12 +5,14 @@ const api = require('../api');
 const fetch = require('../fetch');
 const root = '/api';
 const when = require('when');
+import PasswordStrengthMeter  from './passwordStrengthMeter';
 
 class Login extends Component{
   
     constructor(props) {
+        
 		super(props);
-        this.state = {newuser: false, errorText: "" };	
+        this.state = {newuser: false, errorText: "", password: '' };	
         this.handleLogin = this.handleLogin.bind(this);
         this.handleNewUser = this.handleNewUser.bind(this);
         this.username = null;
@@ -122,7 +124,8 @@ class Login extends Component{
 
                 this.setState({
                     newuser: false,
-                    errorText: ""
+                    errorText: "",
+                    password: ""
                 });
             }
            
@@ -189,12 +192,12 @@ class Login extends Component{
             
             this.setState({
                 newuser: status,
-                errorText: ""
+                errorText: "",
+                password: ""
             });
 
 
         };
-
 
         if(!this.state.newuser){
             return (
@@ -234,9 +237,10 @@ class Login extends Component{
                                 <p>
                                     <input title="Syötä tähän uusi käyttäjätunnus" ref={this.setnewUsername} type="text" placeholder="Anna käyttäjätunnus" className="field"/>
                                 </p>
-                                <p>
-                                    <input title="Syötä tähän salasanasi" ref={this.setnewPassword} type="password" placeholder="Anna salasana" className="field"/>
+                                <p className="passbottom">
+                                    <input title="Syötä tähän salasanasi" ref={this.setnewPassword} onChange={e => this.setState({ password: e.target.value })} type="password" placeholder="Anna salasana"  className="field"/>
                                 </p>
+                                <PasswordStrengthMeter password={this.state.password} />
                                 <p>
                                     <input title="Syötä tähän sama salasana kuin ylhäällä" ref={this.setnewPassword2} type="password" placeholder="Anna salasana uudestaan" className="field"/>
                                 </p>

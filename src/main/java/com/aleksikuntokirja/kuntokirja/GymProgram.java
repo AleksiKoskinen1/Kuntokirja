@@ -26,6 +26,9 @@ public class GymProgram {
 	private String subject;
 	private String program;
 	private LocalDate localdate;
+	private Integer repeatance;
+	private Integer repDuration;
+	private LocalDate repEndTime;
 	
 	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name="user_id")
@@ -33,7 +36,7 @@ public class GymProgram {
 
 	private GymProgram() {}
 
-	public GymProgram(Integer startTime, Integer duration, Integer half, String subject, String program, LocalDate localdate, User user) {
+	public GymProgram(Integer startTime, Integer duration, Integer half, String subject, String program, LocalDate localdate, User user, Integer repeatance, Integer repDuration, LocalDate repEndTime) {
 		this.startTime = startTime;
 		this.duration = duration;
 		this.half = half;
@@ -41,6 +44,9 @@ public class GymProgram {
 		this.program = program;
 		this.localdate = localdate;
 		this.user = user;
+		this.repeatance = repeatance;
+		this.repDuration = repDuration;
+		this.repEndTime = repEndTime;
 	}
 
 
@@ -56,13 +62,16 @@ public class GymProgram {
 			Objects.equals(subject, gymprogram.subject) &&
 			Objects.equals(program, gymprogram.program) &&
 			Objects.equals(localdate, gymprogram.localdate)&&
+			Objects.equals(repeatance, gymprogram.repeatance) &&
+			Objects.equals(repDuration, gymprogram.repDuration) &&
+			Objects.equals(repEndTime, gymprogram.repEndTime) &&
 			Objects.equals(user, gymprogram.user);
 	}
 
 	@Override
 	public int hashCode() {
 
-		return Objects.hash(startTime, duration, half, subject, program, localdate, user);
+		return Objects.hash(startTime, duration, half, subject, program, localdate, repeatance, repDuration, repEndTime, user);
 	}
 
 	public Long getId() {
@@ -120,15 +129,25 @@ public class GymProgram {
 	public void setProgram(String program) {
 		this.program = program;
 	}
-	/*
-	public User getUser() {
-		return user;
+	public Integer getRepeatance() {
+		return repeatance;
 	}
-
-	public void setUser(User user) {
-		this.user = user;
-	}*/
-
+	public void setRepeatance(Integer repeatance) {
+		this.repeatance = repeatance;
+	}
+	public Integer getRepDuration() {
+		return repDuration;
+	}
+	public void setRepDuration(Integer repDuration) {
+		this.repDuration = repDuration;
+	}
+	public LocalDate getRepEndTime() {
+		return repEndTime;
+	}
+	public void setRepEndTime(LocalDate endt) {
+		this.repEndTime = endt;
+	}
+	
 	@Override
 	public String toString() {
 		
