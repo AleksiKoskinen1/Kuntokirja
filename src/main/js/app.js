@@ -10,6 +10,7 @@ const api = require('./api');
 const when = require('when');
 import WeightManagment from './components/weightManagment';
 import GymProgram from './components/GymProgram';
+import ProgramResults from './components/programResults';
 import Login from './components/Login';
 
 class App extends Component {
@@ -47,7 +48,7 @@ class App extends Component {
 			else{
 				this.setState({
 					loggedIn: true,
-					page: 1,
+					page: 2,
 					user: results.entity,
 					session: true
 				});
@@ -62,8 +63,9 @@ class App extends Component {
 	logOut(e){
 
 		e.preventDefault();	
-
-	 	api({method: 'GET', path: '/api/logout/'}).done(() => {            
+		console.log("JOO");
+	 	api({method: 'GET', path: '/api/logout/'}).done(() => {     
+			 console.log("DONE");       
             this.setState({
 				loggedIn: false,
 				page: 1,
@@ -93,6 +95,7 @@ class App extends Component {
 
 				const renderView = () =>{
 					if(page == 1) return <GymProgram user={this.state.user}/>
+					if(page == 2) return <ProgramResults user={this.state.user} />
 					if(page == 3) return <WeightManagment user={this.state.user}/>
 				}
 
@@ -210,6 +213,7 @@ class TopSection extends Component{
 						<ul id="nav" ref={this.setNavDiv} >				
 							<li className={activeClasses[0]? "current" : ""}><a href="#" onClick={this.changeView.bind(this, 1)}>Treeniohjelmat</a></li>
 							<li style={{'display': 'none'}}className={activeClasses[1]? "current" : ""}><a href="#" onClick={this.changeView.bind(this, 2)}>Tulokset</a></li>
+							<li className={activeClasses[1]? "current" : ""}><a href="#" onClick={this.changeView.bind(this, 2)}>Tulokset</a></li>
 							<li className={activeClasses[2]? "current" : ""}><a href="#" onClick={this.changeView.bind(this, 3)}>Painonhallinta</a></li>
 						</ul>
 						
@@ -230,7 +234,8 @@ class TopSection extends Component{
 							</div>
 							<div className="dropdown-content">
 								<a href="#" onClick={this.changeView.bind(this, 1)}>Treeniohjelmat</a>
-								<a href="#" onClick={this.changeView.bind(this, 2)}>Painonhallinta</a>
+								<a href="#" onClick={this.changeView.bind(this, 2)}>Tulokset</a>
+								<a href="#" onClick={this.changeView.bind(this, 3)}>Painonhallinta</a>
 								<a href="#" onClick={this.props.logOut}>Kirjaudu ulos</a>
 							</div>
 						</div>

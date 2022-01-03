@@ -106,6 +106,7 @@ class GymProgram extends Component{
 
     newProgram(subject, program, start, end, day, toistuvuus, kesto){
         api({method: 'POST', path: '/api/postProgram/'+ this.props.user.id + '/' + program + '/' + subject + '/' + start + '/' + end + '/' + day + '/' + toistuvuus + '/' + kesto}).done(response => {
+            console.log(response);
             api({method: 'GET', path: '/api/getHighestId/'}).done(response => {
                 this.loadGymData2(response.entity);
             });            
@@ -142,8 +143,6 @@ class GymProgram extends Component{
         let start = startOfWeek.format('YYYY') + "-" + startOfWeek.format('MM') + "-" +startOfWeek.format('DD');
         let end = endOfWeek.format('YYYY') + "-" + endOfWeek.format('MM') + "-" +endOfWeek.format('DD');
 
-    //    console.log(cDate.getFullYear() + "-" + ("0" + (cDate.getMonth() + 1)).slice(-2) + "-" + ("0" + cDate.getDate()).slice(-2));
-        
         api({method: 'GET', path: '/api/getUserProgramsWithDates/'+start+'/'+end+'/'+this.props.user.id}).done(response => {
             api({method: 'GET', path: '/api/getUserRepeatanceProgramsWithDates/'+start+'/'+end+'/'+this.props.user.id}).done(repeatResults => {
                 this.setState({

@@ -1,16 +1,20 @@
 package com.aleksikuntokirja.kuntokirja;
 
+import java.io.Serializable;
 import java.util.*;
 
 import javax.persistence.*;
 
 import org.springframework.context.annotation.Bean;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+
 //import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 ///import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+//@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @Entity(name = "User_entity") 
 @Table(name = "user_entity")
 public class User {
@@ -26,18 +30,18 @@ public class User {
 	@OneToMany(
 	        mappedBy = "user",
     		fetch = FetchType.LAZY,
-	        cascade = CascadeType.ALL,
-	        orphanRemoval = true
+	        cascade = CascadeType.ALL/*,
+	        orphanRemoval = true*/
 	    )
-	private List<GymProgram> programs = new ArrayList<>();
+	private List<GymProgram> programs = new ArrayList<GymProgram>();
 	
 	@OneToMany(
 	        mappedBy = "user",
     		fetch = FetchType.LAZY,
-	        cascade = CascadeType.ALL,
-	        orphanRemoval = true
+	        cascade = CascadeType.ALL//,
+	      //  orphanRemoval = true
 	    )
-	private List<Weight> weights = new ArrayList<>();
+	private List<Weight> weights = new ArrayList<Weight>();
 	
 	public User() {}
 
@@ -89,14 +93,15 @@ public class User {
 	public String getPassword() {
 		return password;
 	}
+	/*
 	public List<GymProgram> getPrograms() {
 		return programs;
 	}
-
+*/
 	public void setPrograms(List<GymProgram> programs) {
 		this.programs = programs;
 	}
-	
+	/*
 	public List<Weight> getWeights() {
 		return weights;
 	}
@@ -104,7 +109,7 @@ public class User {
 	public void setWeights(List<Weight> weights) {
 		this.weights = weights;
 	}
-	
+	*/
 	
 	@Override
 	public String toString() {

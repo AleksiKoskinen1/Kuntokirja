@@ -15,7 +15,10 @@ public interface WeightRepository extends CrudRepository<Weight, Long> {
 
 		@Query(value = "SELECT * FROM Weight where user_id = ?3 AND year = ?1 AND month = ?2 order by day DESC", nativeQuery = true)
 		public List<Weight> getUserWeightsWithDates(Integer year,Integer month,Integer id);
-		   
+		  
+		@Query(value = "SELECT * FROM Weight where user_id = ?2 AND year = ?1 order by month ASC", nativeQuery = true)
+		public List<Weight> getUserWeightsFromYear(Integer year,Integer id);
+		
 		@Query(value = "SELECT id FROM Weight where user_id = ?4 AND year = ?1 AND month = ?2 AND day = ?3", nativeQuery = true)
 		public Long getUserPossibleWeight(Integer year,Integer month, Integer day,Long id);
 		  

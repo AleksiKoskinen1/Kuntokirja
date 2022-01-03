@@ -54,6 +54,8 @@ public class RestReittiController {
 	private WeightRepository wrepo;
 	@Autowired
 	private UserRepository userrepo;
+	@Autowired
+	private ProgramResultsRepository resrepo;
 	
 	@GetMapping("/api/getUser/{username}/{password}")
 	public List<User> getUserByName(@PathVariable String username, @PathVariable String password, final HttpServletRequest request){
@@ -82,17 +84,21 @@ public class RestReittiController {
 		
 		@SuppressWarnings("unchecked")
 		final List<String> id = (List<String>) session.getAttribute(MY_SESSION_USER_ID);
+		
+        if( !CollectionUtils.isEmpty(id)) {
+        	String aaa = id.get(0).toString();	    
+        	aaa = aaa.replaceAll("[^1-9]", "");
+        	 
+        	long idN = Long.parseLong(aaa);
+        	Optional<User> user = userrepo.findById(idN);
+        	return user;
+        }
+        else {
+        	   System.out.println("FINAL!!");
+        	return Optional.empty();
+        }
 	        
-	        if( !CollectionUtils.isEmpty(id)) {
-	        	String aaa = id.get(0).toString();	        	
-	        	aaa = aaa.replaceAll("[^1-9]", "");
-	        	 
-	        	long idN = Long.parseLong(aaa);
-	        	Optional<User> user = userrepo.findById(idN);
-	    		
-	        	return user;
-	        }
-	        else return Optional.empty();
+	     
 	}
 	
 	@PostMapping(path = "/api/createNewUser/{username}/{password}")
@@ -113,6 +119,7 @@ public class RestReittiController {
 	
 	@DeleteMapping(path = "/api/delProg/{id}")
 	public void delProg(@PathVariable Long id) {		
+		resrepo.deleteResults(id);
 		gymrepo.deleteProgram(id); 		
 	}
 	
@@ -133,10 +140,16 @@ public class RestReittiController {
 		//Tässä haettu jokainen toistuva ohjelma (Ei haeta muita). Katsotaan jokainen läpi ja jos osuu valitulle viikolle, otetaan mukaan
 		List<GymProgram> weekPrograms = gymrepo.getUserRepeatanceProgramsWithDates(LocalDate.parse(startDate),LocalDate.parse(endDate), id); 
 		List<Object> newList = new ArrayList<Object>();
-		
+	/*	
+		for (int i = 0; i < weekPrograms.size(); i++) {
+            System.out.println(weekPrograms.get(i));
+        }
+		*/
 		String [] sDates = startDate.split("-", 5); //Pisteen splittaus vaatii \\ eteen
 		String [] eDates = endDate.split("-", 5); //Pisteen splittaus vaatii \\ eteen
 				
+		
+		
 		LocalDate locS = LocalDate.of(Integer.parseInt(sDates[0]), Integer.parseInt(sDates[1]), Integer.parseInt(sDates[2]));   
 		LocalDate locE = LocalDate.of(Integer.parseInt(eDates[0]), Integer.parseInt(eDates[1]), Integer.parseInt(eDates[2]));   
 		locE = locE.plus(1, ChronoUnit.DAYS);  //Jotta silmukat käy vikan päivän läpi
@@ -158,12 +171,13 @@ public class RestReittiController {
 			LocalDate programDate =  singleProgram.getLocalDate();			
 			int dayOfWeek = 0;
 				
+			
 			while( !locS.equals(locE) ) {  //Käydään jokainen päivä läpi yksitellen
 				int repDurStart = 1;
 				programDate = singleProgram.getLocalDate();
 				String one = "";
 				dayOfWeek++;
-				while(repDurStart != repDur) {						
+				while(repDurStart != repDur) {
 					if(locS.equals(programDate)) {
 						
 						if(dayOfWeek == 7) dayOfWeek = 0; //Viikko alkaa 0 päivästä
@@ -193,7 +207,40 @@ public class RestReittiController {
 	
 	@GetMapping("/api/getUserProgramsWithDates/{startDate}/{endDate}/{id}")
 	public List<GymProgram> getUserProgramsWithDates(@PathVariable String startDate, @PathVariable String endDate, @PathVariable Integer id){
+		
+		List<GymProgram> aa = gymrepo.getUserProgramsWithDates(LocalDate.parse(startDate),LocalDate.parse(endDate), id); 
 		return gymrepo.getUserProgramsWithDates(LocalDate.parse(startDate),LocalDate.parse(endDate), id); 
+		
+	}
+	
+	@GetMapping("/api/getUserProgramsAndResultsWithDates/{startDate}/{endDate}/{id}")
+	public List<Object> getUserProgramsAndResultsWithDates(@PathVariable String startDate, @PathVariable String endDate, @PathVariable Integer id){
+		
+		List<Object> newList = new ArrayList<Object>();
+		
+		List<GymProgram> onceProgs = gymrepo.getUserProgramsWithDatesv2(LocalDate.parse(startDate), id); 
+				
+		List<Object> finalResults = getUserRepeatanceProgramsWithDates(startDate, endDate, id);
+		
+		List<GymProgram> programList = (List<GymProgram>) finalResults.get(0);
+		List<Object> timeList = (List<Object>) finalResults.get(1);
+		
+		List<String> progStrings = new ArrayList<String>();
+		
+		for (int i = 0; i < onceProgs.size(); i++) {
+			
+            System.out.println(onceProgs.get(i));
+            programList.add(onceProgs.get(i));            
+            
+            progStrings.add("1-1-1-1");  //TAULUKKO
+            timeList.add(progStrings);
+        
+		}
+		
+		newList.add(programList);
+		newList.add(timeList);
+		
+		return newList;
 		
 	}
 	
@@ -202,6 +249,12 @@ public class RestReittiController {
 		return wrepo.getUserWeightsWithDates(year,month,id); 
 		
 	}
+	
+	@GetMapping("/api/getUserWeightsWithYear/{year}/{id}")
+	public List<Weight> getUserWeightsWithMY(@PathVariable Integer year, @PathVariable Integer id){
+		return wrepo.getUserWeightsFromYear(year,id); 		
+	}
+	
 	
 	@GetMapping("/api/getProgramById/{id}")
 	public Optional<GymProgram> getProgById(@PathVariable Long id){
@@ -224,6 +277,34 @@ public class RestReittiController {
 	}
 		*/
 	
+	@PostMapping(path = "/api/postResult/{id}/{content}/{resultDate}/")
+	public void addResultsToProgram(@PathVariable Long id, @PathVariable String content, @PathVariable String resultDate) {
+		
+		Long rid = resrepo.getProgramResults(id, LocalDate.parse(resultDate));
+		
+		if(rid != null) {
+			resrepo.updateResults(id, content, LocalDate.parse(resultDate));
+		}
+		else {
+						
+			Optional<GymProgram> gprogram = gymrepo.findById(id);
+			
+			if (gprogram.isPresent()) {
+									    
+				String [] sDates = resultDate.split("-", 5); 						
+				
+				LocalDate rD = LocalDate.of(Integer.parseInt(sDates[0]), Integer.parseInt(sDates[1]), Integer.parseInt(sDates[2]));  
+				GymProgram gp = gprogram.get();
+				ProgramResults prg = new ProgramResults(content, rD);
+				prg.setProgram(gp);
+				resrepo.save(prg);
+			}
+			else {
+				//error handling..ei pitäis tänne päätyy kyl ku id löydetty
+			}			
+		}	
+	}
+	
 	@PostMapping(path = "/api/postWeight/{id}/{date}/{weight}")
 	public void addWeightToUser(@PathVariable Long id, @PathVariable String date,@PathVariable Float weight) {
 	
@@ -235,8 +316,11 @@ public class RestReittiController {
 	
 		    //Katsotaan, että jos paino on olemassa, niin tehdään sen päivitys (vain 1 paino per päivä!) Jos ei olemassa, lisätään uusi
 		    Long w = wrepo.getUserPossibleWeight(Integer.parseInt(dateSplitted[2]), Integer.parseInt(dateSplitted[1]), Integer.parseInt(dateSplitted[0]), id);
+				    
 		    if (w == null) {
-		    	wrepo.save(new Weight(weight, Integer.parseInt(dateSplitted[2]), Integer.parseInt(dateSplitted[1]), Integer.parseInt(dateSplitted[0]), curUser));
+		    	Weight ww = new Weight(weight, Integer.parseInt(dateSplitted[2]), Integer.parseInt(dateSplitted[1]), Integer.parseInt(dateSplitted[0]));
+		    	ww.setUser(curUser);
+		    	wrepo.save(ww);
 		    }
 		    else {
 		    	wrepo.updateWeight(w, weight);
@@ -293,7 +377,10 @@ public class RestReittiController {
 		Optional<User> user = userrepo.findById(id);
 		if (user.isPresent()) {
 		    User curUser = user.get();
-		    gymrepo.save(new GymProgram(Integer.parseInt(startTimes[0]), duration, half, subject,  program, pStartDate, curUser, repeatance, repDuration, durEndDate));
+		    GymProgram rr = new GymProgram(Integer.parseInt(startTimes[0]), duration, half, subject,  program, pStartDate, repeatance, repDuration, durEndDate);
+		    
+		    rr.setUser(curUser);
+		    gymrepo.save(rr);
 		}
 	}
 	

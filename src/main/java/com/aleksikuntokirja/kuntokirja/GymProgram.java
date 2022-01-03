@@ -1,6 +1,9 @@
 package com.aleksikuntokirja.kuntokirja;
 
+import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import javax.persistence.CascadeType;
@@ -11,6 +14,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity(name = "Program") 
@@ -33,17 +38,28 @@ public class GymProgram {
 	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name="user_id")
     private User user;
+	
+/*	@OneToOne(mappedBy = "gymProgram",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private ProgramResults presults;*/
+	
+	@OneToMany(
+	        mappedBy = "program",
+    		fetch = FetchType.LAZY,
+	        cascade = CascadeType.ALL//,
+	      //  orphanRemoval = true
+	    )
+	private List<ProgramResults> presults = new ArrayList<ProgramResults>();
 
 	private GymProgram() {}
 
-	public GymProgram(Integer startTime, Integer duration, Integer half, String subject, String program, LocalDate localdate, User user, Integer repeatance, Integer repDuration, LocalDate repEndTime) {
+	public GymProgram(Integer startTime, Integer duration, Integer half, String subject, String program, LocalDate localdate/*, User user*/, Integer repeatance, Integer repDuration, LocalDate repEndTime) {
 		this.startTime = startTime;
 		this.duration = duration;
 		this.half = half;
 		this.subject = subject;
 		this.program = program;
 		this.localdate = localdate;
-		this.user = user;
+//		this.user = user;
 		this.repeatance = repeatance;
 		this.repDuration = repDuration;
 		this.repEndTime = repEndTime;
@@ -64,14 +80,14 @@ public class GymProgram {
 			Objects.equals(localdate, gymprogram.localdate)&&
 			Objects.equals(repeatance, gymprogram.repeatance) &&
 			Objects.equals(repDuration, gymprogram.repDuration) &&
-			Objects.equals(repEndTime, gymprogram.repEndTime) &&
-			Objects.equals(user, gymprogram.user);
+			Objects.equals(repEndTime, gymprogram.repEndTime);// &&
+		//	Objects.equals(user, gymprogram.user);
 	}
 
 	@Override
 	public int hashCode() {
 
-		return Objects.hash(startTime, duration, half, subject, program, localdate, repeatance, repDuration, repEndTime, user);
+		return Objects.hash(startTime, duration, half, subject, program, localdate, repeatance, repDuration, repEndTime/*, user*/);
 	}
 
 	public Long getId() {
@@ -148,15 +164,34 @@ public class GymProgram {
 		this.repEndTime = endt;
 	}
 	
+	public void setPresults(List<ProgramResults> gp) {
+		this.presults = gp;
+	}
+	
+	public List<ProgramResults> getPresults() {
+		return presults;
+	}
+	
+	public void setUser(User u ) {
+		this.user = u;
+	}
+	public User getUser() {
+		return user;
+	}
+	
+	
+	
 	@Override
 	public String toString() {
 		
-		return "GymProgram{" +
-			"id=" + id +
+		/*return "GymProgram{" +
+			"iddd=" + id +
+			"iddd=" + user.toString() +
+			"iddd=" + presults.toString() +
 			", startTime=" + startTime+
-       /*     ", duration='" + duration + 
+            ", duration='" + duration + 
             ", program=" + program + '\'' +
-            ", User=" + user.toString() + '\'' +*/
-			'}';
+			'}';*/
+		return "GymProgram ID: " + id + " RESULTS: "  + presults.toString() + "";
 	}
 }

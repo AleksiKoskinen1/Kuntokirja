@@ -1,5 +1,6 @@
 package com.aleksikuntokirja.kuntokirja;
 
+import java.io.Serializable;
 import java.sql.Date;
 import java.util.Objects;
 
@@ -31,12 +32,12 @@ public class Weight {
 
 	private Weight() {}
 
-	public Weight(Float weight, Integer year, Integer month, Integer day, User user) {
+	public Weight(Float weight, Integer year, Integer month, Integer day/*, User user*/) {
 		this.weight = weight;
 		this.year = year;
 		this.month = month;
 		this.day = day;
-		this.user = user;
+	//	this.user = user;
 	}
  
 	@Override
@@ -48,14 +49,14 @@ public class Weight {
 			Objects.equals(weight, weights.weight) &&
 			Objects.equals(year, weights.year) &&
 			Objects.equals(month, weights.month) &&
-			Objects.equals(day, weights.day) &&
-			Objects.equals(user, weights.user);
+			Objects.equals(day, weights.day);// &&
+		//	Objects.equals(user, weights.user);
 	}
 
 	@Override
 	public int hashCode() {
 
-		return Objects.hash(weight, year, month, day, user);
+		return Objects.hash(weight, year, month, day/*, user*/);
 	}
 
 	public Long getId() {
@@ -95,22 +96,22 @@ public class Weight {
 	public void setDay(Integer day) {
 		this.day = day;
 	}
-	/*
+	
 	public void setUser(User u) {
 		this.user = u;
 	}
 	
-	public String getUser(User u) {
-		return u.toString();
+	public User getUser(User u) {
+		return user;
 	}
-*/
+
 	@Override
 	public String toString() {
 		return "Weight{" +
 			"id=" + id +
 			", weight=" + weight+
 			", year='" + year + '\'' +
-			", userID=" + user.getName()+
+	/*		", userID=" + user.getName()+*/
 			'}';
 	} 
 }

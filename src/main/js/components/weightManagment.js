@@ -8,7 +8,7 @@ const api = require('../api');
 import moment from 'moment';
 const when = require('when');
 import Recharts from 'recharts'
-import { LineChart, Line, XAxis, YAxis } from "recharts";
+import { LineChart, Line, XAxis, YAxis, Label } from "recharts";
 
 class WeightManagment extends Component{
 
@@ -18,7 +18,7 @@ class WeightManagment extends Component{
 		const curY = new Date().getFullYear();
 		const curM = new Date().getMonth() + 1; //Alkaa 0:sta
 
-		this.state = { weights: [], attributes: [], year: curY, month: curM};		
+		this.state = { weights: [], attributes: [], year: curY, month: curM, yearWeights: []};		
 		this.addRow = this.addRow.bind(this);
 		this.changeCalender = this.changeCalender.bind(this);
 		this.deleteWeight = this.deleteWeight.bind(this);
@@ -30,13 +30,16 @@ class WeightManagment extends Component{
 	
 	loadWeightData() {
 
-		api({method: 'GET', path: '/api/getUserWeightsWithMY/'+this.state.year+'/'+this.state.month+'/'+this.props.user.id}).done(response => {
-			this.setState({
-				weights: response.entity,
-				
+		api({method: 'GET', path: '/api/getUserWeightsWithMY/'+this.state.year+'/'+this.state.month+'/'+this.props.user.id}).done(monthWeights => {
+			api({method: 'GET', path: '/api/getUserWeightsWithYear/'+this.state.year+'/'+this.props.user.id}).done(yearWeight => {
+				this.setState({
+					weights: monthWeights.entity,
+					yearWeights: yearWeight.entity
+				});
 			});
 		});
 
+		
 	}
 
 	componentDidMount() { 
@@ -64,22 +67,26 @@ class WeightManagment extends Component{
 		if(!year){
 
 			let m = parseInt(month) + 1; //alkaa 0:sta, lisätään 1
-			api({method: 'GET', path: '/api/getUserWeightsWithMY/'+this.state.year+'/'+m+'/'+this.props.user.id}).done(response => {
-				this.setState({
-					weights: response.entity,
-					month: m
-					
+			api({method: 'GET', path: '/api/getUserWeightsWithMY/'+this.state.year+'/'+m+'/'+this.props.user.id}).done(monthWeights => {
+				api({method: 'GET', path: '/api/getUserWeightsWithYear/'+this.state.year+'/'+this.props.user.id}).done(yearWeight => {
+					this.setState({
+						weights: monthWeights.entity,
+						month: m,
+						yearWeights: yearWeight.entity
+					});
 				});
 			});
 		}
 		else if(!month){
 
 			let y = parseInt(year);
-			api({method: 'GET', path: '/api/getUserWeightsWithMY/'+y+'/'+this.state.month+'/'+this.props.user.id}).done(response => {
-				this.setState({
-					weights: response.entity,
-					year: y
-					
+			api({method: 'GET', path: '/api/getUserWeightsWithMY/'+y+'/'+this.state.month+'/'+this.props.user.id}).done(monthWeights => {
+				api({method: 'GET', path: '/api/getUserWeightsWithYear/'+y+'/'+this.props.user.id}).done(yearWeight => {
+					this.setState({
+						weights: monthWeights.entity,
+						year: y,
+						yearWeights: yearWeight.entity
+					});
 				});
 			});
 		}
@@ -94,8 +101,6 @@ class WeightManagment extends Component{
 	}
 	//Muokataan painoa
 	editWeight(id, weight) {
-		console.log(id);
-		console.log(weight);
 		api({method: 'POST', path: '/api/editWeight/'+id+'/'+weight}).done(() => {
 			this.loadWeightData();
 			window.location = "#"; //poistetaan dialogi
@@ -105,12 +110,94 @@ class WeightManagment extends Component{
 
 	render() { 
 
+		const months = [];
+		months[1] = "Tam";
+		months[2] = "Hel";
+		months[3] = "Maa";
+		months[4] = "Huh";
+		months[5] = "Tou";
+		months[6] = "Kes";
+		months[7] = "Hei";
+		months[8] = "Elo";
+		months[9] = "Syy";
+		months[10] = "Lok";
+		months[11] = "Mar";
+		months[12] = "Jou";
+
+		const yearData = [];
+		var sum = 0;
+		var amount = 0;
+		var median = 0;
+		var curMon = 1;
+		var yearMinMax = [];
+		yearMinMax[0] = 1000;
+		yearMinMax[1] = 0;
+		for(var a = 0; a<this.state.yearWeights.length;a++){
+			if(this.state.yearWeights[a].month == curMon){
+				amount = amount + 1;
+				sum = sum + this.state.yearWeights[a].weight;
+			} 
+			else{
+				if(sum != 0){
+					median = sum / amount;
+					median = Math.round((median + Number.EPSILON) * 100) / 100;
+					let keyValue = {
+						mon: months[curMon],
+						value: median
+					};
+					yearData.push(keyValue);
+					if(median < yearMinMax[0]) yearMinMax[0] = median;
+					if(median > yearMinMax[1]) yearMinMax[1] = median;
+				}
+				curMon = this.state.yearWeights[a].month;
+				sum = 0;
+				amount = 0;
+				median = 0;
+
+				amount = amount + 1;
+				sum = sum + this.state.yearWeights[a].weight;
+			}
+			
+		}
+		if(sum != 0){
+			median = sum / amount;
+			median = Math.round((median + Number.EPSILON) * 100) / 100;
+			let keyValue = {
+				mon: months[curMon],
+				value: median
+			};
+			yearData.push(keyValue);
+			if(median < yearMinMax[0]) yearMinMax[0] = median;
+			if(median > yearMinMax[1]) yearMinMax[1] = median;
+		}
+
+		yearMinMax[0] = yearMinMax[0] - 2;  //Vähä siimaa graffaan, ettei viiva mee iha alalaidas yms
+		yearMinMax[1] = yearMinMax[1] + 2;
+		
+		var wChange = new Array();
+		var wlen = this.state.weights.length;
+		for(var i=(wlen-1); i >= 0; i--){
+			
+			if(i == (wlen - 1)){
+				wChange[this.state.weights[i].id] = "-"; 				
+			}
+			else{
+				let w1 = this.state.weights[i+1].weight;
+				let w2 = this.state.weights[i].weight;
+
+				let valueC = w1-w2;
+				let wC = (valueC / w1) * 100
+				wChange[this.state.weights[i].id] = wC;
+			}
+		}
+
 		var dbweights;
 		dbweights = this.state.weights.map(weight =>
 			<Weight key={weight.id}
 					weight={weight}
 					deleteWeight={this.deleteWeight}
-					editWeight={this.editWeight}/>
+					editWeight={this.editWeight}
+					weightChange={wChange[weight.id]}/>
 		);
 
 		const data = [];
@@ -158,6 +245,7 @@ class WeightManagment extends Component{
 									<tr>
 										<th>Päivämäärä</th>
 										<th>Paino</th>
+										<th>Muutos</th>
 										<th></th>
 									</tr>
 								</thead>					
@@ -167,17 +255,41 @@ class WeightManagment extends Component{
 							</table>
 						</div>
 						<div className="chartDiv">
-							<LineChart
-							width={countCharW}
-							height={300}
-							data={data}
-							margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
-							>
-							<Line type="monotone" dataKey="value" stroke="#8884d8" dot={false} />
-							<XAxis dataKey="day" />
-							<YAxis domain={[minYvalue, maxYvalue]} />
-							</LineChart>
+							<div>
+								<LineChart
+								width={countCharW}
+								height={300}
+								data={data}
+								margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
+								>
+								<Line type="monotone" dataKey="value" stroke="#8884d8" dot={false} />
+								<XAxis dataKey="day" height={80} >
+								<Label value="Päivä" position="center"  />
+								</XAxis>
+								<YAxis width={120} domain={[minYvalue, maxYvalue]} >
+								<Label value="Paino" position="center" angle={90} />
+								</YAxis>
+								</LineChart>
+							</div>
+							<div>
+								<LineChart
+								width={countCharW}
+								height={300}
+								data={yearData}
+								margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
+								>
+								<Line type="monotone" dataKey="value" stroke="#8884d8" dot={false} />
+								<XAxis dataKey="mon" height={80} >
+								<Label value="Kuukausi" position="center"  />
+								</XAxis>
+								<YAxis width={120} domain={[yearMinMax[0], yearMinMax[1]]} >
+								<Label value="Paino" position="center" angle={90} />
+								</YAxis>
+								</LineChart>
+
+							</div>
 						</div>
+
 					</div>			
 				</div>
 			</div>
@@ -232,10 +344,18 @@ class Weight extends Component{
 			else return "editWeight" + this.props.weight.id;
 		}
 
+		const weightChange = () => {
+			if(this.props.weightChange == "-") return <td className="tCent">-</td>;
+			let number = Math.round(this.props.weightChange * 100) / 100;
+			if(this.props.weightChange > 0)	return <td className="wInc tCent">{number}%</td>;
+			else return <td className="wDec tCent">{number}%</td>;
+		}
+
 		return (			
 			<tr>
 				<td>{dayString()}</td>
 				<td>{this.props.weight.weight} kg</td>
+				{weightChange()}
 				<td>
 					<input onClick={this.delete.bind(this)} className="talImages pointer" type="image" src="trash.png" alt="Poista" title="Poista paino" width="15" height="15"></input>
 					<a href={divID(true)}>

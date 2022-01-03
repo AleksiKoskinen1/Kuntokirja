@@ -20,6 +20,10 @@ public interface GymProgramRepository extends CrudRepository<GymProgram, Long> {
   @Query(value = "SELECT * FROM Program where localdate >= ?1 AND localdate <= ?2 AND user_id = ?3 AND (repeatance = 1 OR rep_duration = 1 OR rep_duration = 0)", nativeQuery = true)
   public List<GymProgram> getUserProgramsWithDates(LocalDate startDate, LocalDate endDate, Integer id);
   
+  @Query(value = "SELECT * FROM Program AS p LEFT JOIN results as R ON p.id = r.program_id where p.localdate = ?1 AND p.user_id = ?2 AND (p.repeatance = 1 OR p.rep_duration = 1 OR p.rep_duration = 0)", nativeQuery = true)
+  public List<GymProgram> getUserProgramsWithDatesv2(LocalDate startDate, Integer id);
+  
+  
   @Query(value = "SELECT * FROM Program where localdate <= ?2 AND rep_end_time >= ?1 AND user_id = ?3 AND repeatance != 1 AND rep_duration != 1 AND rep_duration != 0", nativeQuery = true)
   public List<GymProgram> getUserRepeatanceProgramsWithDates(LocalDate startDate, LocalDate endDate, Integer id);
    
@@ -32,7 +36,6 @@ public interface GymProgramRepository extends CrudRepository<GymProgram, Long> {
   public void updateProgram();
   */
   @Modifying
-  //@Query(value = "DELETE FROM Program WHERE startTime = 11", nativeQuery = true)
   @Transactional
   @Query("DELETE FROM Program c WHERE c.id = ?1")
   public void deleteProgram(Long id);
