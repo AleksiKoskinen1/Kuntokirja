@@ -36,7 +36,7 @@ class App extends Component {
 	checkSession(){
 
 		api({method: 'GET', path: '/api/getSession/'}).done(results => {
-				
+			
 			if(results.entity == null){
 				this.setState({
 					loggedIn: false,
@@ -48,7 +48,7 @@ class App extends Component {
 			else{
 				this.setState({
 					loggedIn: true,
-					page: 2,
+					page: 1,
 					user: results.entity,
 					session: true
 				});
@@ -63,10 +63,8 @@ class App extends Component {
 	logOut(e){
 
 		e.preventDefault();	
-		console.log("JOO");
 	 	api({method: 'GET', path: '/api/logout/'}).done(() => {     
-			 console.log("DONE");       
-            this.setState({
+		    this.setState({
 				loggedIn: false,
 				page: 1,
 				user: null

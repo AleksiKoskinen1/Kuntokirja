@@ -128,11 +128,12 @@ public class RestReittiController {
 		wrepo.deleteWeight(id); 		
 	}
 	
-	@PostMapping(path = "/api/editWeight/{id}/{weight}")
-	public void editWeight(@PathVariable Long id,@PathVariable Float weight) {		
-		wrepo.updateWeight(id, weight); 		
+	@PostMapping(path = "/api/editWeight/{id}/{weight}/{info}")
+	public void editWeight(@PathVariable Long id,@PathVariable Float weight,@PathVariable String info) {	
+		if(info.equals("empty")) info = "";
+		wrepo.updateWeight(id, weight, info); 		
 	}
-	
+	 
 	@SuppressWarnings("null")
 	@GetMapping("/api/getUserRepeatanceProgramsWithDates/{startDate}/{endDate}/{id}")
 	public List<Object> getUserRepeatanceProgramsWithDates(@PathVariable String startDate, @PathVariable String endDate, @PathVariable Integer id){
@@ -305,8 +306,8 @@ public class RestReittiController {
 		}	
 	}
 	
-	@PostMapping(path = "/api/postWeight/{id}/{date}/{weight}")
-	public void addWeightToUser(@PathVariable Long id, @PathVariable String date,@PathVariable Float weight) {
+	@PostMapping(path = "/api/postWeight/{id}/{date}/{extrainfo}/{weight}")
+	public void addWeightToUser(@PathVariable Long id, @PathVariable String date, @PathVariable String extrainfo, @PathVariable Float weight) {
 	
 		String[] dateSplitted = date.split("\\.", 5);  //Pisteen splittaus vaatii \\ eteen
 			
@@ -317,13 +318,15 @@ public class RestReittiController {
 		    //Katsotaan, että jos paino on olemassa, niin tehdään sen päivitys (vain 1 paino per päivä!) Jos ei olemassa, lisätään uusi
 		    Long w = wrepo.getUserPossibleWeight(Integer.parseInt(dateSplitted[2]), Integer.parseInt(dateSplitted[1]), Integer.parseInt(dateSplitted[0]), id);
 				    
+		    if(extrainfo.equals("empty")) extrainfo = "";
+		    
 		    if (w == null) {
-		    	Weight ww = new Weight(weight, Integer.parseInt(dateSplitted[2]), Integer.parseInt(dateSplitted[1]), Integer.parseInt(dateSplitted[0]));
+		    	Weight ww = new Weight(weight, Integer.parseInt(dateSplitted[2]), Integer.parseInt(dateSplitted[1]), Integer.parseInt(dateSplitted[0]), extrainfo);
 		    	ww.setUser(curUser);
 		    	wrepo.save(ww);
 		    }
 		    else {
-		    	wrepo.updateWeight(w, weight);
+		    	wrepo.updateWeight(w, weight, extrainfo);
 		    }
 		}
 	}

@@ -53,8 +53,9 @@ class WeightManagment extends Component{
 	}
 
 	addRow(weightToAdd){
-
-		api({method: 'POST', path: '/api/postWeight/'+ this.props.user.id + '/' + weightToAdd.date + '/' + weightToAdd.weight + '/'}).done(() => {
+		
+		if(weightToAdd.extrainfo == "") weightToAdd.extrainfo = "empty";
+		api({method: 'POST', path: '/api/postWeight/'+ this.props.user.id + '/' + weightToAdd.date + '/' + weightToAdd.extrainfo + '/' + weightToAdd.weight }).done(() => {
 			this.loadWeightData();	
 			window.location = "#"; //poistetaan dialogi
         });
@@ -100,8 +101,9 @@ class WeightManagment extends Component{
         });
 	}
 	//Muokataan painoa
-	editWeight(id, weight) {
-		api({method: 'POST', path: '/api/editWeight/'+id+'/'+weight}).done(() => {
+	editWeight(id, weight, info) {
+		if(info == "") info = "empty";
+		api({method: 'POST', path: '/api/editWeight/'+id+'/'+weight+'/'+info}).done(() => {
 			this.loadWeightData();
 			window.location = "#"; //poistetaan dialogi
 			
@@ -245,6 +247,7 @@ class WeightManagment extends Component{
 									<tr>
 										<th>Päivämäärä</th>
 										<th>Paino</th>
+										<th>Lisäinfo</th>
 										<th>Muutos</th>
 										<th></th>
 									</tr>
@@ -304,8 +307,10 @@ class Weight extends Component{
 
 		this.wSpan = null;
 		this.weightP = null;
+		this.lisainfo = null;
 		this.setWSpan = element => { this.wSpan = element; };
 		this.setWDiv = element => { this.weightP = element; };
+		this.setInfoDiv = element => { this.lisainfo = element; };
 	}
 
 	delete(e) {
@@ -321,9 +326,10 @@ class Weight extends Component{
 			return;
 		} else this.wSpan.style="color: black";
 
-		this.props.editWeight(this.props.weight.id, this.weightP.value);
+		this.props.editWeight(this.props.weight.id, this.weightP.value, this.lisainfo.value);
 
 		this.weightP.value = "";
+		this.lisainfo.value = "";
 	}
 	
 	render() {
@@ -355,6 +361,7 @@ class Weight extends Component{
 			<tr>
 				<td>{dayString()}</td>
 				<td>{this.props.weight.weight} kg</td>
+				<td>{this.props.weight.extrainfo}</td>
 				{weightChange()}
 				<td>
 					<input onClick={this.delete.bind(this)} className="talImages pointer" type="image" src="trash.png" alt="Poista" title="Poista paino" width="15" height="15"></input>
@@ -372,6 +379,10 @@ class Weight extends Component{
 									<span ref={this.setWSpan} className="inputInfo">Syötä uusi paino kiloina esim. 95.40</span>
 									<p>
 										<input ref={this.setWDiv} type="text" placeholder="Paino" className="field"/>
+									</p>
+									<p>
+										<span className="inputInfo">Syötä mahdollinen lisäinfo</span>
+										<input ref={this.setInfoDiv} type="text" placeholder="Lisäinfo" className="field"/>
 									</p>								
 
 									<button onClick={this.edit.bind(this)}>Lisää</button>
@@ -397,10 +408,12 @@ class AddWeight extends Component {
         this.weightDiv = null;
 		this.dateSpan = null;
         this.weightSpan = null;
+		this.infoSpan = null;
 		this.setDateDiv = element => { this.dateDiv = element; };
         this.setWeightDiv = element => { this.weightDiv = element; };
 		this.setDateSpan = element => { this.dateSpan = element; };
 		this.setWeightSpan = element => { this.weightSpan = element; };
+		this.setInfoSpan = element => { this.infoSpan = element; };
 	}
 
 	handleInput(e) {
@@ -430,8 +443,11 @@ class AddWeight extends Component {
 	
 		newWeight['weight'] = this.weightDiv.value; 
 		newWeight['date'] = this.dateDiv.value; 
+	//	newWeight['extrainfo'] = ""; 
+		newWeight['extrainfo'] = this.infoSpan.value; 
 
 		this.weightDiv.value = "";
+		this.infoSpan.value = "";
 		
 		this.props.addRow(newWeight);
 	
@@ -506,6 +522,11 @@ class AddWeight extends Component {
 								<p>
 									<input type="text" placeholder="Paino" ref={this.setWeightDiv} className="field"/>
 									
+								</p>
+
+								<p>
+									<span className="inputInfo">Syötä mahdollinen lisäinfo</span>
+									<input ref={this.setInfoSpan} type="text" placeholder="Lisäinfo" className="field"/>
 								</p>
 								<button onClick={this.handleSubmit}>Lisää</button>
 							</form>

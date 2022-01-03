@@ -25,6 +25,7 @@ public class Weight {
 	private Integer year;  //Otetaan jokainen erikseen tällä kertaa. 
 	private Integer month;
 	private Integer day;
+	private String extrainfo;
 	
 	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name="user_id")
@@ -32,12 +33,12 @@ public class Weight {
 
 	private Weight() {}
 
-	public Weight(Float weight, Integer year, Integer month, Integer day/*, User user*/) {
+	public Weight(Float weight, Integer year, Integer month, Integer day, String info) {
 		this.weight = weight;
 		this.year = year;
 		this.month = month;
 		this.day = day;
-	//	this.user = user;
+		this.extrainfo = info;
 	}
  
 	@Override
@@ -49,14 +50,14 @@ public class Weight {
 			Objects.equals(weight, weights.weight) &&
 			Objects.equals(year, weights.year) &&
 			Objects.equals(month, weights.month) &&
-			Objects.equals(day, weights.day);// &&
-		//	Objects.equals(user, weights.user);
+			Objects.equals(day, weights.day) &&
+			Objects.equals(extrainfo, weights.extrainfo);
 	}
 
 	@Override
 	public int hashCode() {
 
-		return Objects.hash(weight, year, month, day/*, user*/);
+		return Objects.hash(weight, year, month, day, extrainfo);
 	}
 
 	public Long getId() {
@@ -95,6 +96,14 @@ public class Weight {
 
 	public void setDay(Integer day) {
 		this.day = day;
+	}
+	
+	public String getExtrainfo() {
+		return extrainfo;
+	}
+
+	public void setExtrainfo(String info) {
+		this.extrainfo = info;
 	}
 	
 	public void setUser(User u) {

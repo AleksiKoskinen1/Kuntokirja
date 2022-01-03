@@ -24,8 +24,8 @@ public interface WeightRepository extends CrudRepository<Weight, Long> {
 		  
 		@Modifying
 		@Transactional
-		@Query("UPDATE Weight SET weight = ?2 where id = ?1")
-		public void updateWeight(Long id, Float weight);
+		@Query("UPDATE Weight SET weight = ?2, extrainfo = ?3 where id = ?1")
+		public void updateWeight(Long id, Float weight, String info);
 		
 		@Modifying
 		@Transactional
